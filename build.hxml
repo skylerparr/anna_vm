@@ -1,0 +1,10 @@
+-main Main
+-lib munit
+-lib hamcrest
+-lib mockatoo
+-lib minject
+-lib continuation
+-lib hxcpp-debugger
+-cp src
+-D HXCPP_M64
+-cpp build/anna_vm
