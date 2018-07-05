@@ -1,10 +1,12 @@
 import massive.munit.TestSuite;
 
 import core.ObjectFactoryTest;
-import vm.DefaultByteCodeInterpreterTest;
+import util.MatcherTest;
+import vm.DefaultSystemTest;
 import vm.terms.VMAtomTest;
 import vm.terms.VMFloatTest;
 import vm.terms.VMIntegerTest;
+import vm.terms.VMSmallUTF8AtomTest;
 import vm.terms.VMStringTest;
 import vm.terms.VMUTF8AtomTest;
 
@@ -21,10 +23,12 @@ class TestSuite extends massive.munit.TestSuite
 		super();
 
 		add(core.ObjectFactoryTest);
-		add(vm.DefaultByteCodeInterpreterTest);
+		add(util.MatcherTest);
+		add(vm.DefaultSystemTest);
 		add(vm.terms.VMAtomTest);
 		add(vm.terms.VMFloatTest);
 		add(vm.terms.VMIntegerTest);
+		add(vm.terms.VMSmallUTF8AtomTest);
 		add(vm.terms.VMStringTest);
 		add(vm.terms.VMUTF8AtomTest);
 	}

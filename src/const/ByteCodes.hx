@@ -7,7 +7,8 @@ class ByteCodes {
   public static inline var FLOAT: Int = 70;
   public static inline var STRING: Int = 107;
   public static inline var ATOM: Int = 100;
-  public static inline var UTF8_ATOM: Int = 119;
+  public static inline var SMALL_UTF8_ATOM: Int = 119;
+  public static inline var UTF8_ATOM: Int = 118;
 
   public function new() {
   }

@@ -1,25 +1,22 @@
 package vm;
-import haxe.io.BytesBuffer;
-import haxe.io.BufferInput;
-import haxe.io.BytesInput;
-import haxe.io.Input;
-import vm.terms.VMUTF8Atom;
-import vm.terms.VMAtom;
-import vm.terms.VMString;
-import vm.terms.VMFloat;
-import error.InvalidByteCodeError;
-import haxe.io.BytesData;
-import vm.terms.VMInteger;
 import const.ByteCodes;
+import error.InvalidByteCodeError;
 import haxe.io.Bytes;
+import haxe.io.BytesData;
+import vm.terms.VMAtom;
+import vm.terms.VMFloat;
+import vm.terms.VMInteger;
+import vm.terms.VMSmallUTF8Atom;
+import vm.terms.VMString;
+import vm.terms.VMUTF8Atom;
 
-class DefaultByteCodeInterpreter implements ByteCodeInterpreter {
+class DefaultSystem implements System {
 
 
   public function new() {
   }
 
-  public function interpret(bytes:Bytes):Term {
+  public function binaryToTerm(bytes:Bytes):Term {
     var data: BytesData = bytes.getData();
     if(Bytes.fastGet(data, 0) == ByteCodes.START) {
       switch Bytes.fastGet(data, 1) {
@@ -32,6 +29,9 @@ class DefaultByteCodeInterpreter implements ByteCodeInterpreter {
         case ByteCodes.ATOM:
           var length: Int = Bytes.fastGet(data, 2) + Bytes.fastGet(data, 3);
           return new VMAtom(bytes.getString(4, length));
+        case ByteCodes.SMALL_UTF8_ATOM:
+          var length: Int = Bytes.fastGet(data, 2);
+          return new VMSmallUTF8Atom(bytes.getString(3, length));
         case ByteCodes.UTF8_ATOM:
           var length: Int = Bytes.fastGet(data, 2);
           return new VMUTF8Atom(bytes.getString(3, length));
