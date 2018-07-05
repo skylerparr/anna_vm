@@ -6,7 +6,7 @@
 -lib minject
 -lib continuation
 -lib hxcpp-debugger
---macro mcover.MCover.coverage([''],['src'],['lang.*'])
+--macro mcover.MCover.coverage([''],['src'],[])
 -D MCOVER
 -cp src
 

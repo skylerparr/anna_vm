@@ -19,6 +19,4 @@ class Atoms {
         map;
     }
 
-    public function new() {
-    }
 }

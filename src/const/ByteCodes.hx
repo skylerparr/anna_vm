@@ -1,5 +1,4 @@
 package const;
-@IgnoreCover
 class ByteCodes {
 
   public static inline var START: Int = 131;
@@ -10,6 +9,4 @@ class ByteCodes {
   public static inline var SMALL_UTF8_ATOM: Int = 119;
   public static inline var UTF8_ATOM: Int = 118;
 
-  public function new() {
-  }
 }
