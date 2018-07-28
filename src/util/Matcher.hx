@@ -16,7 +16,11 @@ class Matcher {
         if (left.value == right) {
           //empty on purpose
         } else {
-          return {matched: false, matchedVars: null};
+          if(Reflect.hasField(right, "type") && left.value.type == right.type && left.value.value == right.value) {
+            return {matched: true, matchedVars: matchedVars};
+          } else {
+            return {matched: false, matchedVars: null};
+          }
         }
       case MatchType.VARIABLE:
         matchedVars.set(left.varName, right);
@@ -59,8 +63,7 @@ class Matcher {
         if (mapRight.exists(keyValue)) {
           var matchData:MatchData = tryMatch(mapLeft.get(key), mapRight.get(keyValue), scope, matchedVars);
           if (!matchData.matched) {
-            matchData.matched = false;
-            matchData.matchedVars = null;
+            updateUnmatched(matchData);
             return matchData;
           }
         } else {
@@ -70,8 +73,7 @@ class Matcher {
               return tryMatch(mapLeft.get(key), mapRight.get(keyValue), scope, matchData.matchedVars);
             }
           }
-          matchData.matched = false;
-          matchData.matchedVars = null;
+          updateUnmatched(matchData);
           break;
         }
       }
@@ -88,8 +90,7 @@ class Matcher {
     for (i in 0...arrayRight.length) {
       matchData = tryMatch(arrayLeft[i], arrayRight[i], scope, matchedVars);
       if (!matchData.matched) {
-        matchData.matched = false;
-        matchData.matchedVars = null;
+        updateUnmatched(matchData);
         break;
       }
     }
@@ -105,11 +106,15 @@ class Matcher {
       var rightItem:Dynamic = listRight.pop();
       matchData = tryMatch(item, rightItem, scope, matchedVars);
       if (!matchData.matched) {
-        matchData.matched = false;
-        matchData.matchedVars = null;
+        updateUnmatched(matchData);
         break;
       }
     }
     return matchData;
+  }
+
+  private static inline function updateUnmatched(matchData: MatchData): Void {
+    matchData.matched = false;
+    matchData.matchedVars = null;
   }
 }

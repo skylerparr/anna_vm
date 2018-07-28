@@ -1,8 +1,4 @@
 package error;
-class InvalidByteCodeError {
-  public var message: String;
+class InvalidByteCodeError extends BasicError {
 
-  public function new(message: String) {
-    this.message = message;
-  }
 }

@@ -6,6 +6,7 @@
 -lib minject
 -lib continuation
 -lib hxcpp-debugger
+-lib haxe-strings
 --macro mcover.MCover.coverage([''],['src'],[])
 -D MCOVER
 -cp src
@@ -16,5 +17,5 @@
 #-debug
 #-D HXCPP_DEBUGGER
 #-D integration
---no-inline
+#--no-inline
 -cpp build/cpp_test

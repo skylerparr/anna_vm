@@ -56,6 +56,15 @@ class MatcherTest {
   }
 
   @Test
+  public function shouldMatchOnEmptyTuple():Void {
+    var left:MatchValue = getComplexMatcher({value: [], type: Types.TUPLE});
+    var right:Tuple = {value: [], type: Types.TUPLE};
+
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
   public function shouldMatchOnTuple():Void {
     var left:MatchValue = getComplexMatcher({value: [getMatcher(1), getMatcher("foo"), getMatcher(123)], type: Types.TUPLE});
     var right:Tuple = {value: [1, "foo", 123], type: Types.TUPLE};
@@ -122,6 +131,12 @@ class MatcherTest {
   public function shouldMatchOnAtoms():Void {
     var left:MatchValue = getMatcher(Atoms.TRUE);
     var right:Atom = Atoms.TRUE;
+
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+
+    var left:MatchValue = getMatcher({value: "anna", type: Types.ATOM});
+    var right:Atom = {value: "anna", type: Types.ATOM};
 
     var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
