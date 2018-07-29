@@ -156,7 +156,133 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateATupleWithASingleStringElement(): Void {
     var left: MatchValue = interp.encode("{\"foo\"}");
     var right: Tuple = {value: ["foo"], type: Types.TUPLE};
-//    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
-//    Assert.isTrue(matchData.matched);
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateATupleWithManyElementsAndTypes(): Void {
+    var left: MatchValue = interp.encode("{\"foo\", 385, :anna}");
+    var right: Tuple = {value: ["foo", 385, {value: "anna", type: Types.ATOM}], type: Types.TUPLE};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateATupleManyStrings(): Void {
+    var left: MatchValue = interp.encode("{\"foo\", \"bar\", \"anna\"}");
+    var right: Tuple = {value: ["foo", "bar", "anna"], type: Types.TUPLE};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateATupleManyAtoms(): Void {
+    var left: MatchValue = interp.encode("{:foo, :bar, :\"anna\"}");
+    var right: Tuple = {value: [{value: "foo", type: Types.ATOM}, {value: "bar", type: Types.ATOM}, {value: "anna", type: Types.ATOM}], type: Types.TUPLE};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateATupleManyNumbers(): Void {
+    var left: MatchValue = interp.encode("{100, 3490, 4939.34, 489, 950}");
+    var right: Tuple = {value: [100, 3490, 4939.34, 489, 950], type: Types.TUPLE};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateTypeWithNestedTuple(): Void {
+    var left: MatchValue = interp.encode("{{}}");
+    var right: Tuple = {value: [{value: [], type: Types.TUPLE}], type: Types.TUPLE};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateTypeWithNestedTupleValue(): Void {
+    var left: MatchValue = interp.encode("{{1,2,3},{4,5,6}}");
+    var right: Tuple = {value: [{value: [1,2,3], type: Types.TUPLE},{value: [4,5,6], type: Types.TUPLE}], type: Types.TUPLE};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateEmptyList():Void {
+    var left: MatchValue = interp.encode("[]");
+    var rightList:List<Dynamic> = new List<Dynamic>();
+    var right:LinkedList = {value: rightList, type: Types.LIST};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateListWithStringValues():Void {
+    var left: MatchValue = interp.encode("[\"anna\", \"food\", \"bar\"]");
+
+    var rightList:List<Dynamic> = new List<Dynamic>();
+    rightList.add("anna");
+    rightList.add("food");
+    rightList.add("bar");
+    var right:LinkedList = {value: rightList, type: Types.LIST};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateListWithNumberValues():Void {
+    var left: MatchValue = interp.encode("[315, 621.64, 3492]");
+
+    var rightList:List<Dynamic> = new List<Dynamic>();
+    rightList.add(315);
+    rightList.add(621.64);
+    rightList.add(3492);
+    var right:LinkedList = {value: rightList, type: Types.LIST};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateListWithAtoms():Void {
+    var left: MatchValue = interp.encode("[:anna, :loves, :\"food\"]");
+
+    var rightList:List<Dynamic> = new List<Dynamic>();
+    rightList.add({value: "anna", type: Types.ATOM});
+    rightList.add({value: "loves", type: Types.ATOM});
+    rightList.add({value: "food", type: Types.ATOM});
+    var right:LinkedList = {value: rightList, type: Types.LIST};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateListWithAtomsStringsAndNumbers():Void {
+    var left: MatchValue = interp.encode("[:anna, :loves, 25, \"food\"]");
+
+    var rightList:List<Dynamic> = new List<Dynamic>();
+    rightList.add({value: "anna", type: Types.ATOM});
+    rightList.add({value: "loves", type: Types.ATOM});
+    rightList.add(25);
+    rightList.add("food");
+    var right:LinkedList = {value: rightList, type: Types.LIST};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateListWithAtomsStringsNumbersTuplesAndLists():Void {
+    //The interpreter is working the matcher is wrong FIXIT
+    var left: MatchValue = interp.encode("[:anna, {:loves, 25, [\"food\"]}]");
+
+    var rightList:List<Dynamic> = new List<Dynamic>();
+    rightList.add({value: "anna", type: Types.ATOM});
+    var foodList:List<Dynamic> = new List<Dynamic>();
+    foodList.add("food");
+    var tuple: Tuple = {value: [{value: "loves", type: Types.ATOM}, 25, {value: foodList, type: Types.LIST}], type: Types.TUPLE};
+    rightList.add(tuple);
+    var right:LinkedList = {value: rightList, type: Types.LIST};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
   }
 }

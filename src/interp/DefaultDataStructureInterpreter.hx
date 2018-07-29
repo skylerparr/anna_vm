@@ -17,6 +17,8 @@ enum ParsingState {
   STRING;
   ATOM;
   TUPLE;
+  LIST;
+  MAP;
 }
 
 typedef Parse = {
@@ -36,6 +38,9 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
   private static var colon = ~/:/;
   private static var open_brace = ~/\{/;
   private static var close_brace = ~/\}/;
+  private static var comma = ~/,/;
+  private static inline var OPEN_BRACKET: String = "[";
+  private static inline var CLOSE_BRACKET: String = "]";
 
   public function new() {
   }
@@ -53,7 +58,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
     return parse.matchValue;
   }
 
-  private function doEncode(parse: Parse): Void {
+  private inline function doEncode(parse: Parse): Void {
     var currentStr: String = parse.string;
     var strLength: Int = currentStr.length;
 
@@ -68,16 +73,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
         if(parse.state == ParsingState.NONE) {
           continue;
         } else if(parse.state == ParsingState.NUMBER) {
-          parse.state = ParsingState.NONE;
-          if(currentVal.contains(".")) {
-            var val: Float = Std.parseFloat(currentVal);
-            parse.matchValue = MatcherSupport.getMatcher(val);
-          } else if(Std.parseInt(currentVal) == null) {
-            throw new UnableToInterpretStringError('Unable to cast ${currentVal} to integer.');
-          } else {
-            var val: Int = Std.parseInt(currentVal);
-            parse.matchValue = MatcherSupport.getMatcher(val);
-          }
+          parseNumber(currentVal, parse);
           break;
         } else if(parse.state == ParsingState.ATOM) {
           parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
@@ -101,7 +97,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
         } else if(parse.state == ParsingState.STRING) {
           parse.matchValue = MatcherSupport.getMatcher(currentVal);
           parse.state = ParsingState.NONE;
-          continue;
+          break;
         } else if(parse.state == ParsingState.ATOM) {
           var atomParse: Parse = {string: currentStr.substring(parse.currentIndex), origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
           doEncode(atomParse);
@@ -127,9 +123,12 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
       if(open_brace.match(char)) {
         if(parse.state == ParsingState.NONE) {
           parse.state = ParsingState.TUPLE;
-          var tupleParse: Parse = {string: currentStr.substring(parse.currentIndex + 1), origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          parse.matchValue = MatcherSupport.getComplexMatcher({value: [], type: Types.TUPLE});
+          var newString: String = currentStr.substring(parse.currentIndex + 1);
+          var tupleParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
           doEncode(tupleParse);
-          trace(tupleParse);
+          parse.currentIndex += tupleParse.currentIndex;
+          parse.matchValue.value.value.push(tupleParse.matchValue);
           continue;
         }
       }
@@ -139,7 +138,65 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           break;
         } else if(parse.state == ParsingState.TUPLE) {
           parse.state = ParsingState.NONE;
-          parse.matchValue = MatcherSupport.getComplexMatcher({value: [], type: Types.TUPLE});
+          parse.matchValue = parse.matchValue;
+          parse.currentIndex++;
+          break;
+        } else if(parse.state == ParsingState.ATOM) {
+          parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
+          parse.currentIndex++;
+          break;
+        }
+      }
+      if(char == OPEN_BRACKET) {
+        if(parse.state == ParsingState.NONE) {
+          parse.state = ParsingState.LIST;
+          var list:List<Dynamic> = new List<Dynamic>();
+          parse.matchValue = MatcherSupport.getComplexMatcher({value: list, type: Types.LIST});
+          var newString: String = currentStr.substring(parse.currentIndex + 1);
+          var listParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          doEncode(listParse);
+          parse.currentIndex += listParse.currentIndex;
+          if(listParse.matchValue != null) {
+            parse.matchValue.value.value.add(listParse.matchValue);
+          }
+          continue;
+        }
+      }
+      if(char == CLOSE_BRACKET) {
+        if(parse.state == ParsingState.NONE) {
+          parse.matchValue = null;
+          break;
+        } else if(parse.state == ParsingState.LIST) {
+          parse.state = ParsingState.NONE;
+          parse.matchValue = parse.matchValue;
+          parse.currentIndex++;
+          break;
+        } else if(parse.state == ParsingState.ATOM) {
+          parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
+          parse.currentIndex++;
+          break;
+        }
+      }
+      if(comma.match(char)) {
+        if(parse.state == ParsingState.TUPLE) {
+          var newString: String = currentStr.substring(parse.currentIndex + 1);
+          var tupleParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          doEncode(tupleParse);
+          parse.currentIndex += tupleParse.currentIndex - 1;
+          parse.matchValue.value.value.push(tupleParse.matchValue);
+          continue;
+        } else if(parse.state == ParsingState.LIST) {
+          var newString: String = currentStr.substring(parse.currentIndex + 1);
+          var listParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          doEncode(listParse);
+          parse.currentIndex += listParse.currentIndex - 1;
+          parse.matchValue.value.value.add(listParse.matchValue);
+          continue;
+        } else if(parse.state == ParsingState.ATOM) {
+          parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
+          break;
+        } else if(parse.state == ParsingState.NUMBER) {
+          parseNumber(currentVal, parse);
           break;
         }
       }
@@ -147,6 +204,19 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
     }
     if(parse.state == ParsingState.STRING) {
       throw new UnableToInterpretStringError('Unexpected end of line');
+    }
+  }
+
+  private inline function parseNumber(currentVal: String, parse: Parse): Void {
+    parse.state = ParsingState.NONE;
+    if(currentVal.contains(".")) {
+      var val: Float = Std.parseFloat(currentVal);
+      parse.matchValue = MatcherSupport.getMatcher(val);
+    } else if(Std.parseInt(currentVal) == null) {
+      throw new UnableToInterpretStringError('Unable to cast ${currentVal} to integer.');
+    } else {
+      var val: Int = Std.parseInt(currentVal);
+      parse.matchValue = MatcherSupport.getMatcher(val);
     }
   }
 

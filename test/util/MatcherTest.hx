@@ -74,6 +74,24 @@ class MatcherTest {
   }
 
   @Test
+  public function shouldMatchOnMultipleTupleTypes(): Void {
+    var left:MatchValue = getComplexMatcher({value: [getMatcher(1), getMatcher("foo"), getMatcher({value: "anna", type: Types.ATOM})], type: Types.TUPLE});
+    var right:Tuple = {value: [1, "foo", {value: "anna", type: Types.ATOM}], type: Types.TUPLE};
+
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldMatchMismatchedTupleSize(): Void {
+    var left:MatchValue = getComplexMatcher({value: [getMatcher("foo")], type: Types.TUPLE});
+    var right:Tuple = {value: ["foo", 384, {value: "anna", type: Types.ATOM}], type: Types.TUPLE};
+
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isFalse(matchData.matched);
+  }
+
+  @Test
   public function shouldNotMatchOnTupleIfNotMatched():Void {
     var left:MatchValue = getComplexMatcher({value: {value: [getMatcher(1), getMatcher("foo"), getMatcher(123)], type: Types.TUPLE}});
     var right:Tuple = {value: [1, "bar", 123], type: Types.TUPLE};
@@ -128,6 +146,16 @@ class MatcherTest {
   }
 
   @Test
+  public function shouldMatchOnMixedTupleTypes(): Void {
+    var leftTuple: Tuple = {value: [getMatcher({value: "loves", type: Types.ATOM}), getMatcher(25)], type: Types.TUPLE}
+    var left:MatchValue = getComplexMatcher(leftTuple);
+
+    var right: Tuple = {value: [{value: "loves", type: Types.ATOM}, 25], type: Types.TUPLE};
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
   public function shouldMatchOnAtoms():Void {
     var left:MatchValue = getMatcher(Atoms.TRUE);
     var right:Atom = Atoms.TRUE;
@@ -163,6 +191,18 @@ class MatcherTest {
   }
 
   @Test
+  public function shouldMatchOnEmptyList(): Void {
+    var leftList:List<Dynamic> = new List<Dynamic>();
+    var rightList:List<Dynamic> = new List<Dynamic>();
+
+    var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftList, type: Types.LIST}};
+    var right:LinkedList = {value: rightList, type: Types.LIST};
+
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
   public function shouldMatchOnLists():Void {
     var leftList:List<Dynamic> = new List<Dynamic>();
     leftList.add(getMatcher("2"));
@@ -177,6 +217,30 @@ class MatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftList, type: Types.LIST}};
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
+    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldMatchListWithAtomsStringsNumbersTuplesAndLists():Void {
+    var leftFoodList: List<MatchValue> = new List<MatchValue>();
+    leftFoodList.add(getMatcher("food"));
+
+    var leftList:List<MatchValue> = new List<MatchValue>();
+    leftList.add(getMatcher({value: "anna", type: Types.ATOM}));
+
+    var leftTuple: Tuple = {value: [getMatcher({value: "loves", type: Types.ATOM}), getMatcher(25), getComplexMatcher({value: leftFoodList, type: Types.LIST})], type: Types.TUPLE}
+
+    leftList.add(getComplexMatcher(leftTuple));
+    var left:MatchValue = getComplexMatcher({value: leftList, type: Types.LIST});
+
+    var rightList:List<Dynamic> = new List<Dynamic>();
+    rightList.add({value: "anna", type: Types.ATOM});
+    var foodList:List<Dynamic> = new List<Dynamic>();
+    foodList.add("food");
+    var tuple: Tuple = {value: [{value: "loves", type: Types.ATOM}, 25, {value: foodList, type: Types.LIST}], type: Types.TUPLE};
+    rightList.add(tuple);
+    var right:LinkedList = {value: rightList, type: Types.LIST};
     var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
   }

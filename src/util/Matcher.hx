@@ -88,7 +88,15 @@ class Matcher {
 
     var matchData:MatchData = {matched: true, matchedVars: matchedVars};
     for (i in 0...arrayRight.length) {
-      matchData = tryMatch(arrayLeft[i], arrayRight[i], scope, matchedVars);
+      var left = arrayLeft[i];
+      var right = arrayRight[i];
+
+      @IgnoreCover
+      if(left == null || right == null) {
+        updateUnmatched(matchData);
+        break;
+      }
+      matchData = tryMatch(left, right, scope, matchedVars);
       if (!matchData.matched) {
         updateUnmatched(matchData);
         break;
@@ -102,6 +110,12 @@ class Matcher {
     var listLeft:List<Dynamic> = cast(left.value.value, List<Dynamic>);
 
     var matchData:MatchData = {matched: true, matchedVars: matchedVars};
+
+    if(listLeft.length != listRight.length) {
+      updateUnmatched(matchData);
+      return matchData;
+    }
+
     for (item in listLeft) {
       var rightItem:Dynamic = listRight.pop();
       matchData = tryMatch(item, rightItem, scope, matchedVars);
