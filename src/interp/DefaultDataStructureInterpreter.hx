@@ -1,9 +1,7 @@
 package interp;
-import haxe.ds.ObjectMap;
-import haxe.ds.StringMap;
-import util.MatcherSupport;
 import error.UnableToInterpretStringError;
 import haxe.ds.ObjectMap;
+import haxe.ds.StringMap;
 import lang.MatchValue;
 import lang.Types;
 import util.MatcherSupport;
@@ -136,29 +134,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           continue;
         } else if(parse.state == ParsingState.MAP) {
           parse.matchValue = MatcherSupport.getComplexMatcher({value: null, type: Types.MAP});
-          var newString: String = currentStr.substring(parse.currentIndex + 1);
-          var mapKey: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(mapKey);
-          parse.currentIndex += mapKey.currentIndex;
-          if(mapKey.matchValue == null) {
-            parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap<Dynamic, Dynamic>(), type: Types.MAP});
-            continue;
-          }
-
-          var key: Dynamic = mapKey.matchValue.value;
-          if(Std.is(key, String)) {
-            parse.matchValue.value = {value: new StringMap<MatchValue>(), type: Types.MAP};
-          } else {
-            parse.matchValue.value = {value: new ObjectMap<Dynamic, MatchValue>(), type: Types.MAP};
-          }
-
-          var newString: String = currentStr.substring(parse.currentIndex + 5);
-          var mapValue: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(mapValue);
-          parse.currentIndex += mapValue.currentIndex + 4;
-
-          var map: Map<Dynamic, Dynamic> = parse.matchValue.value.value;
-          map.set(mapKey.matchValue.value, MatcherSupport.getMatcher(mapValue.matchValue.value));
+          parseMap(currentStr, parse);
           continue;
         }
       }
@@ -230,29 +206,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           parse.matchValue.value.value.add(listParse.matchValue);
           continue;
         } else if(parse.state == ParsingState.MAP) {
-          var newString: String = currentStr.substring(parse.currentIndex + 1);
-          var mapKey: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(mapKey);
-          parse.currentIndex += mapKey.currentIndex;
-          if(mapKey.matchValue == null) {
-            parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap<Dynamic, Dynamic>(), type: Types.MAP});
-            continue;
-          }
-
-          var key: Dynamic = mapKey.matchValue.value;
-          if(Std.is(key, String)) {
-            parse.matchValue.value = {value: new StringMap<MatchValue>(), type: Types.MAP};
-          } else {
-            parse.matchValue.value = {value: new ObjectMap<Dynamic, MatchValue>(), type: Types.MAP};
-          }
-
-          var newString: String = currentStr.substring(parse.currentIndex + 5);
-          var mapValue: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(mapValue);
-          parse.currentIndex += mapValue.currentIndex + 4;
-
-          var map: Map<Dynamic, Dynamic> = parse.matchValue.value.value;
-          map.set(mapKey.matchValue.value, MatcherSupport.getMatcher(mapValue.matchValue.value));
+          parseMap(currentStr, parse);
           continue;
         } else if(parse.state == ParsingState.ATOM) {
           parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
@@ -284,6 +238,31 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
     } else {
       var val: Int = Std.parseInt(currentVal);
       parse.matchValue = MatcherSupport.getMatcher(val);
+    }
+  }
+
+  private inline function parseMap(currentStr: String, parse: Parse): Void {
+    var newString: String = currentStr.substring(parse.currentIndex + 1);
+    var mapKey: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+    doEncode(mapKey);
+    parse.currentIndex += mapKey.currentIndex;
+    if(mapKey.matchValue == null) {
+      parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap<Dynamic, Dynamic>(), type: Types.MAP});
+    } else {
+      var key: Dynamic = mapKey.matchValue.value;
+      if(Std.is(key, String)) {
+        parse.matchValue.value = {value: new StringMap<MatchValue>(), type: Types.MAP};
+      } else {
+        parse.matchValue.value = {value: new ObjectMap<Dynamic, MatchValue>(), type: Types.MAP};
+      }
+
+      var newString: String = currentStr.substring(parse.currentIndex + 5);
+      var mapValue: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+      doEncode(mapValue);
+      parse.currentIndex += mapValue.currentIndex + 4;
+
+      var map: Map<Dynamic, Dynamic> = parse.matchValue.value.value;
+      map.set(mapKey.matchValue.value, MatcherSupport.getMatcher(mapValue.matchValue.value));
     }
   }
 
