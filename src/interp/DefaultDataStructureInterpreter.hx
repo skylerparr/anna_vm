@@ -30,7 +30,7 @@ typedef Parse = {
 class DefaultDataStructureInterpreter implements DataStructureInterpreter {
 
   private static var empty = ~/\s/;
-  private static var number = ~/[0-9]/;
+  private static var number = ~/[\-0-9]/;
   private static var string = ~/[a-zA-Z]/;
   private static inline var QUOTE = "\"";
   private static inline var COLON = ":";

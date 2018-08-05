@@ -54,6 +54,10 @@ class DefaultDataStructureInterpreterTest {
     var left: MatchValue = interp.encode("  143\n");
     var right: Int = 143;
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+
+    var left: MatchValue = interp.encode("  -143\n");
+    var right: Int = -143;
+    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
   @Test
@@ -302,6 +306,20 @@ class DefaultDataStructureInterpreterTest {
     rightList.add({value: "loves", type: Types.ATOM});
     rightList.add(25);
     rightList.add("food");
+    var right:LinkedList = {value: rightList, type: Types.LIST};
+    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+  }
+
+  @Test
+  public function shouldCreateListWithNumbers():Void {
+    var left: MatchValue = interp.encode("[-321, 25, 0, 43.243]");
+
+    var rightList:List<Dynamic> = new List<Dynamic>();
+    rightList.add(-321);
+    rightList.add(25);
+    rightList.add(0);
+    rightList.add(43.243);
     var right:LinkedList = {value: rightList, type: Types.LIST};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
