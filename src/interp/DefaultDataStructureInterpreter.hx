@@ -1,13 +1,9 @@
 package interp;
-import interp.DefaultDataStructureInterpreter.ParsingState;
-import lang.MatchType;
-import lang.MatchData;
-import lang.Types;
-import lang.Types.Atom;
-import lang.Types.Tuple;
 import error.UnableToInterpretStringError;
-import util.MatcherSupport;
+import haxe.ds.ObjectMap;
 import lang.MatchValue;
+import lang.Types;
+import util.MatcherSupport;
 
 using hx.strings.Strings;
 
@@ -34,13 +30,14 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
   private static var empty = ~/\s/;
   private static var number = ~/[0-9]/;
   private static var string = ~/[a-zA-Z]/;
-  private static var quote = ~/"/;
-  private static var colon = ~/:/;
-  private static var open_brace = ~/\{/;
-  private static var close_brace = ~/\}/;
-  private static var comma = ~/,/;
+  private static inline var QUOTE = "\"";
+  private static inline var COLON = ":";
+  private static inline var OPEN_BRACE = "{";
+  private static inline var CLOSE_BRACE = "}";
+  private static inline var COMMA = ",";
   private static inline var OPEN_BRACKET: String = "[";
   private static inline var CLOSE_BRACKET: String = "]";
+  private static inline var PERCENT: String = "%";
 
   public function new() {
   }
@@ -90,7 +87,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           continue;
         }
       }
-      if(quote.match(char)) {
+      if(char == QUOTE) {
         if(parse.state == ParsingState.NONE) {
           parse.state = ParsingState.STRING;
           continue;
@@ -114,13 +111,13 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           continue;
         }
       }
-      if(colon.match(char)) {
+      if(char == COLON) {
         if(parse.state == ParsingState.NONE) {
           parse.state = ParsingState.ATOM;
           continue;
         }
       }
-      if(open_brace.match(char)) {
+      if(char == OPEN_BRACE) {
         if(parse.state == ParsingState.NONE) {
           parse.state = ParsingState.TUPLE;
           parse.matchValue = MatcherSupport.getComplexMatcher({value: [], type: Types.TUPLE});
@@ -130,9 +127,18 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           parse.currentIndex += tupleParse.currentIndex;
           parse.matchValue.value.value.push(tupleParse.matchValue);
           continue;
+        } else if(parse.state == ParsingState.MAP) {
+          parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap(), type: Types.MAP});
+          var newString: String = currentStr.substring(parse.currentIndex + 1);
+          var mapParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          doEncode(mapParse);
+          parse.currentIndex += mapParse.currentIndex;
+          var map: ObjectMap<Dynamic, Dynamic> = parse.matchValue.value.value;
+          map.set(mapParse.matchValue, MatcherSupport.getMatcher("food"));
+          continue;
         }
       }
-      if(close_brace.match(char)) {
+      if(char == CLOSE_BRACE) {
         if(parse.state == ParsingState.NONE) {
           parse.matchValue = MatcherSupport.getComplexMatcher({value: [], type: Types.TUPLE});
           break;
@@ -177,7 +183,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           break;
         }
       }
-      if(comma.match(char)) {
+      if(char == COMMA) {
         if(parse.state == ParsingState.TUPLE) {
           var newString: String = currentStr.substring(parse.currentIndex + 1);
           var tupleParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
@@ -198,6 +204,11 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
         } else if(parse.state == ParsingState.NUMBER) {
           parseNumber(currentVal, parse);
           break;
+        }
+      }
+      if(char == PERCENT) {
+        if(parse.state == ParsingState.NONE) {
+          parse.state = ParsingState.MAP;
         }
       }
       currentVal = currentVal + char;

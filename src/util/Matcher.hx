@@ -57,9 +57,25 @@ class Matcher {
       var mapRight:ObjectMap<Dynamic, Dynamic> = cast(right.value, ObjectMap<Dynamic, Dynamic>);
       var mapLeft:ObjectMap<Dynamic, Dynamic> = cast(left.value.value, ObjectMap<Dynamic, Dynamic>);
 
+      var mapRightLength: Int = MapUtil.mapSize(mapRight);
+      var mapLeftLength: Int = MapUtil.mapSize(mapLeft);
+
       var matchData:MatchData = {matched: true, matchedVars: matchedVars};
+
+      if(mapRightLength != mapLeftLength) {
+        updateUnmatched(matchData);
+        return matchData;
+      }
+
       for (key in mapLeft.keys()) {
         var keyValue:Dynamic = key.value;
+        trace(keyValue);
+        trace(mapRight.exists(keyValue));
+        trace(mapRight.exists("foo"));
+        trace(mapRight.get(keyValue));
+        for(key in mapRight.keys()) {
+          trace(mapRight.get(key));
+        }
         if (mapRight.exists(keyValue)) {
           var matchData:MatchData = tryMatch(mapLeft.get(key), mapRight.get(keyValue), scope, matchedVars);
           if (!matchData.matched) {
@@ -131,4 +147,5 @@ class Matcher {
     matchData.matched = false;
     matchData.matchedVars = null;
   }
+
 }
