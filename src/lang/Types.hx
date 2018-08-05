@@ -20,7 +20,12 @@ typedef LinkedList = {
     type: Types
 }
 
-typedef MatchMap = {
+typedef MatchStringMap = {
+    value: haxe.ds.StringMap<Dynamic>,
+    type: Types
+}
+
+typedef MatchObjectMap = {
     value: haxe.ds.ObjectMap<Dynamic, Dynamic>,
     type: Types
 }

@@ -1,21 +1,50 @@
-package util;
+package matcher;
 
-import haxe.ds.StringMap;
 import lang.Atoms;
-import util.Matcher;
+import lang.AtomSupport;
+import haxe.ds.StringMap;
+import lang.HashTableAtoms;
+import matcher.DefaultMatcher;
 import lang.MatchData;
 import lang.MatchValue;
 import haxe.ds.ObjectMap;
 import lang.Types.Tuple;
 import lang.Types.Atom;
 import lang.Types.LinkedList;
-import lang.Types.MatchMap;
 import lang.Types;
 import lang.MatchType;
 import massive.munit.Assert;
 
-class MatcherTest {
-//
+using lang.AtomSupport;
+
+class DefaultMatcherTest {
+
+  private var matcher: Matcher;
+
+  public function new() {
+  }
+
+  @BeforeClass
+  public function beforeClass():Void {
+    var atoms: HashTableAtoms = new HashTableAtoms();
+    AtomSupport.atoms = atoms;
+  }
+
+  @AfterClass
+  public function afterClass():Void  {
+    AtomSupport.atoms = null;
+  }
+
+  @Before
+  public function setup(): Void {
+    matcher = new DefaultMatcher();
+  }
+
+  @After
+  public function tearDown(): Void {
+    matcher = null;
+  }
+
 //  @Test
 //  public function shouldMatchConstants():Void {
 //    var left:MatchValue = getMatcher(1);
@@ -158,14 +187,14 @@ class MatcherTest {
 //
 //  @Test
 //  public function shouldMatchOnAtoms():Void {
-//    var left:MatchValue = getMatcher(Atoms.TRUE);
-//    var right:Atom = Atoms.TRUE;
+//    var left:MatchValue = getMatcher("true".atom());
+//    var right:Atom = "true".atom();
 //
 //    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
 //    Assert.isTrue(matchData.matched);
 //
-//    var left:MatchValue = getMatcher({value: "anna", type: Types.ATOM});
-//    var right:Atom = {value: "anna", type: Types.ATOM};
+//    var left:MatchValue = getMatcher("anna".atom());
+//    var right:Atom = "anna".atom();
 //
 //    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
 //    Assert.isTrue(matchData.matched);
@@ -460,21 +489,50 @@ class MatcherTest {
 //    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
 //    Assert.isFalse(matchData.matched);
 //  }
-
-  @Test
-  public function shouldMatchStringKeysInAMap(): Void {
-    var leftMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
-    leftMap.set(getMatcher("foo"), getMatcher("bar"));
-    var rightMap:StringMap<Dynamic> = new StringMap<Dynamic>();
-    rightMap.set("foo", "bar");
-
-//    var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
-//    var right:MatchMap = {value: rightMap, type: Types.MAP};
 //
-//    var matchData:MatchData = Matcher.match(left, right, new Map<String, Dynamic>());
+//  @Test
+//  public function shouldMatchStringKeysInAMap(): Void {
+//    var leftMap:Map<MatchValue, MatchValue> = new ObjectMap<MatchValue, MatchValue>();
+//    leftMap.set(getMatcher("foo"), getMatcher("bar"));
+//    var rightMap:Map<String, Dynamic> = new Map<String, Dynamic>();
+//    rightMap.set("foo", "bar");
+//
+//    var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
+//    var right:MatchStringMap = {value: rightMap, type: Types.MAP};
+//
+//    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
 //    Assert.isTrue(matchData.matched);
-  }
+//  }
+//
+  @Test
+  public function shouldNotMatchStringKeysInAMap(): Void {
+    var leftMap:ObjectMap<MatchValue, MatchValue> = new ObjectMap<MatchValue, MatchValue>();
+    leftMap.set(getMatcher("foo"), getMatcher("bar"));
+    var rightMap:Map<String, Dynamic> = new Map<String, Dynamic>();
+    rightMap.set("food", "bar");
 
+    var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
+    var right:MatchStringMap = {value: rightMap, type: Types.MAP};
+
+    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isFalse(matchData.matched);
+  }
+//
+//  @Test
+//  public function shouldMatchStringKeysInAMapWithDifferentNumberOfKeys(): Void {
+//    var leftMap:ObjectMap<MatchValue, MatchValue> = new ObjectMap<MatchValue, MatchValue>();
+//    leftMap.set(getMatcher("foo"), getMatcher("bar"));
+//    leftMap.set(getMatcher("flower"), getMatcher("daisy"));
+//    var rightMap:Map<String, Dynamic> = new Map<String, Dynamic>();
+//    rightMap.set("foo", "bar");
+//
+//    var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
+//    var right:MatchStringMap = {value: rightMap, type: Types.MAP};
+//
+//    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+//    Assert.isTrue(matchData.matched);
+//  }
+//
 //  @Test
 //  public function shouldMatchKeysAndValuesInAMap():Void {
 //    var foo:Atom = {type: Types.ATOM, value: "foo"};

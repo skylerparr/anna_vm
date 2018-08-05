@@ -8,7 +8,7 @@ import lang.MatchValue;
 import lang.Types.Tuple;
 import lang.Types;
 import massive.munit.Assert;
-import util.Matcher;
+import matcher.DefaultMatcher;
 
 
 class DefaultDataStructureInterpreterTest {
