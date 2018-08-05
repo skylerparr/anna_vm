@@ -7,49 +7,44 @@ import lang.MatchData;
 import lang.MatchValue;
 import haxe.ds.ObjectMap;
 
-enum MapType {
-  STRING;
-  OBJECT;
-}
-
 class DefaultMatcher implements Matcher {
 
   public function new() {
   }
 
-  public inline function match(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>):MatchData {
+  public function match(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>):MatchData {
     return tryMatch(left, right, scope, new Map<String, Dynamic>());
   }
 
-  private function tryMatch(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
+  private inline function tryMatch(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
+    var matchData: MatchData = {matched: true, matchedVars: matchedVars};
     switch(left.type) {
       case MatchType.CONSTANT:
         if (left.value == right) {
-          return {matched: true, matchedVars: matchedVars};
+          matchData = {matched: true, matchedVars: matchedVars};
         } else {
           if(Reflect.hasField(right, "type") && left.value.type == right.type && left.value.value == right.value) {
-            return {matched: true, matchedVars: matchedVars};
+            matchData = {matched: true, matchedVars: matchedVars};
           } else {
-            return {matched: false, matchedVars: null};
+            matchData = {matched: false, matchedVars: null};
           }
         }
       case MatchType.VARIABLE:
         matchedVars.set(left.varName, right);
       case MatchType.COMPLEX:
-        return matchComplex(left, right, scope, matchedVars);
+        matchData = matchComplex(left, right, scope, matchedVars);
       case MatchType.HEAD_TAIL:
-        return matchHeadTail(left, right, scope, matchedVars);
+        matchData = matchHeadTail(left, right, scope, matchedVars);
     }
-    return {matched: true, matchedVars: matchedVars};
+    return matchData;
   }
 
-  private function matchHeadTail(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
+  private inline function matchHeadTail(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
     var listLeft:Array<Dynamic> = cast(left.value, Array<Dynamic>);
     var listRight:List<Dynamic> = cast(right.value, List<Dynamic>);
 
     var matchData:MatchData = {matched: false, matchedVars: matchedVars};
     matchData = tryMatch(listLeft[0], listRight.pop(), scope, matchedVars);
-    @IgnoreCover //for some reason the code coverage tool is not picking this up
     if (matchData.matched) {
       left = listLeft[1];
       matchData = tryMatch(left.value, right, scope, matchedVars);
@@ -57,17 +52,18 @@ class DefaultMatcher implements Matcher {
     return matchData;
   }
 
-  private function matchComplex(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
+  private inline function matchComplex(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
+    var matchData: MatchData = {matched: false, matchedVars: matchedVars};
     if (right.type == Types.TUPLE && left.value.type == Types.TUPLE) {
-      return matchTuple(left, right, scope, matchedVars);
+      matchData = matchTuple(left, right, scope, matchedVars);
     }
     if (right.type == Types.LIST && left.value.type == Types.LIST) {
-      return matchList(left, right, scope, matchedVars);
+      matchData = matchList(left, right, scope, matchedVars);
     }
     if (right.type == Types.MAP && left.value.type == Types.MAP) {
-      return matchMap(left, right, scope, matchedVars);
+      matchData = matchMap(left, right, scope, matchedVars);
     }
-    return {matched: false, matchedVars: matchedVars};
+    return matchData;
   }
 
   private inline function matchTuple(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
@@ -79,7 +75,6 @@ class DefaultMatcher implements Matcher {
       var left = arrayLeft[i];
       var right = arrayRight[i];
 
-      @IgnoreCover
       if(left == null || right == null) {
         updateUnmatched(matchData);
         break;
@@ -116,66 +111,31 @@ class DefaultMatcher implements Matcher {
   }
 
   private inline function matchMap(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
-    var matchData:MatchData;
-
-    if(mapType(right.value) == MapType.STRING) {
-      matchData = matchStringMap(left, right, scope, matchedVars);
-    } else {
-      matchData = matchObjectMap(left, right, scope, matchedVars);
-    }
-    return matchData;
-  }
-
-  private function matchStringMap(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
-    var matchData:MatchData = {matched: true, matchedVars: matchedVars};
-
-    var mapRight:Map<String, Dynamic> = cast(right.value, Map<String, Dynamic>);
-    var mapLeft:Map<Dynamic, Dynamic> = cast(left.value.value, Map<Dynamic, Dynamic>);
-
-    for (key in mapLeft.keys()) {
-      var leftKeyValue: String = key.value;
-    }
-    return matchData;
-  }
-
-  private function matchObjectMap(left:MatchValue, right:Dynamic, scope:Map<String, Dynamic>, matchedVars:Map<String, Dynamic>):MatchData {
     var matchData:MatchData = {matched: true, matchedVars: matchedVars};
 
     var mapRight:Map<Dynamic, Dynamic> = cast(right.value, Map<Dynamic, Dynamic>);
     var mapLeft:Map<Dynamic, Dynamic> = cast(left.value.value, Map<Dynamic, Dynamic>);
 
-    for (key in mapLeft.keys()) {
-      var keyValue: String = key.value;
+    if(MapUtil.first(mapLeft) == null && MapUtil.first(mapRight) != null) {
+      updateUnmatched(matchData);
+    } else {
+      for (key in mapLeft.keys()) {
+        var keyValue: Dynamic = key;
 
-      if (mapRight.exists(keyValue)) {
-        var matchData:MatchData = tryMatch(mapLeft.get(key), mapRight.get(keyValue), scope, matchedVars);
-        if (!matchData.matched) {
-          updateUnmatched(matchData);
-          return matchData;
-        }
-      } else {
-        for (rightKey in mapRight.keys()) {
-          var matchData:MatchData = tryMatch(key, rightKey, scope, matchedVars);
-          if (matchData.matched) {
-            return tryMatch(mapLeft.get(key), mapRight.get(keyValue), scope, matchData.matchedVars);
+        if (mapRight.exists(keyValue)) {
+          var matchData:MatchData = tryMatch(mapLeft.get(key), mapRight.get(keyValue), scope, matchedVars);
+          if (!matchData.matched) {
+            updateUnmatched(matchData);
           }
+        } else {
+          updateUnmatched(matchData);
         }
-        updateUnmatched(matchData);
-        break;
       }
     }
+
     return matchData;
   }
-
-  private inline function mapType(map: Dynamic): MapType {
-    var retVal = MapType.OBJECT;
-    var key: Dynamic = MapUtil.firstKey(map);
-    if(Std.is(key, String)) {
-      retVal = MapType.STRING;
-    }
-    return retVal;
-  }
-
+  
   private inline function updateUnmatched(matchData: MatchData): Void {
     matchData.matched = false;
     matchData.matchedVars = null;

@@ -1,4 +1,5 @@
 package lang;
+import haxe.ds.ObjectMap;
 enum Types {
     ATOM;
     TUPLE;
@@ -26,6 +27,6 @@ typedef MatchStringMap = {
 }
 
 typedef MatchObjectMap = {
-    value: haxe.ds.ObjectMap<Dynamic, Dynamic>,
+    value: ObjectMap<Dynamic, Dynamic>,
     type: Types
 }

@@ -17,5 +17,5 @@
 #-debug
 #-D HXCPP_DEBUGGER
 #-D integration
-#--no-inline
+--no-inline
 -cpp build/cpp_test

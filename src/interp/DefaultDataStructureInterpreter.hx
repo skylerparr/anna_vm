@@ -1,4 +1,7 @@
 package interp;
+import haxe.ds.ObjectMap;
+import haxe.ds.StringMap;
+import util.MatcherSupport;
 import error.UnableToInterpretStringError;
 import haxe.ds.ObjectMap;
 import lang.MatchValue;
@@ -6,6 +9,7 @@ import lang.Types;
 import util.MatcherSupport;
 
 using hx.strings.Strings;
+using lang.AtomSupport;
 
 enum ParsingState {
   NONE;
@@ -73,7 +77,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           parseNumber(currentVal, parse);
           break;
         } else if(parse.state == ParsingState.ATOM) {
-          parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
+          parse.matchValue = MatcherSupport.getMatcher(currentVal.atom());
           break;
         }
       }
@@ -98,8 +102,11 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
         } else if(parse.state == ParsingState.ATOM) {
           var atomParse: Parse = {string: currentStr.substring(parse.currentIndex), origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
           doEncode(atomParse);
-          parse.matchValue = MatcherSupport.getMatcher({value: atomParse.matchValue.value, type: Types.ATOM});
+          var atomName: String = atomParse.matchValue.value;
+          var atom: Atom = atomName.atom();
+          parse.matchValue = MatcherSupport.getMatcher(atom);
           parse.state = ParsingState.NONE;
+          parse.currentIndex += atomParse.currentIndex;
           break;
         }
       }
@@ -128,28 +135,52 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           parse.matchValue.value.value.push(tupleParse.matchValue);
           continue;
         } else if(parse.state == ParsingState.MAP) {
-          parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap(), type: Types.MAP});
+          parse.matchValue = MatcherSupport.getComplexMatcher({value: null, type: Types.MAP});
           var newString: String = currentStr.substring(parse.currentIndex + 1);
-          var mapParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(mapParse);
-          parse.currentIndex += mapParse.currentIndex;
-          var map: ObjectMap<Dynamic, Dynamic> = parse.matchValue.value.value;
-          map.set(mapParse.matchValue, MatcherSupport.getMatcher("food"));
+          var mapKey: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          doEncode(mapKey);
+          parse.currentIndex += mapKey.currentIndex;
+          if(mapKey.matchValue == null) {
+            parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap<Dynamic, Dynamic>(), type: Types.MAP});
+            continue;
+          }
+
+          var key: Dynamic = mapKey.matchValue.value;
+          if(Std.is(key, String)) {
+            parse.matchValue.value = {value: new StringMap<MatchValue>(), type: Types.MAP};
+          } else {
+            parse.matchValue.value = {value: new ObjectMap<Dynamic, MatchValue>(), type: Types.MAP};
+          }
+
+          var newString: String = currentStr.substring(parse.currentIndex + 5);
+          var mapValue: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          doEncode(mapValue);
+          parse.currentIndex += mapValue.currentIndex + 4;
+
+          var map: Map<Dynamic, Dynamic> = parse.matchValue.value.value;
+          map.set(mapKey.matchValue.value, MatcherSupport.getMatcher(mapValue.matchValue.value));
           continue;
         }
       }
       if(char == CLOSE_BRACE) {
         if(parse.state == ParsingState.NONE) {
-          parse.matchValue = MatcherSupport.getComplexMatcher({value: [], type: Types.TUPLE});
+          parse.matchValue = null;
           break;
         } else if(parse.state == ParsingState.TUPLE) {
           parse.state = ParsingState.NONE;
-          parse.matchValue = parse.matchValue;
+          parse.currentIndex++;
+          break;
+        } else if(parse.state == ParsingState.MAP) {
+          parse.state = ParsingState.NONE;
           parse.currentIndex++;
           break;
         } else if(parse.state == ParsingState.ATOM) {
-          parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
-          parse.currentIndex++;
+          parse.state = ParsingState.NONE;
+          parse.matchValue = MatcherSupport.getMatcher(currentVal.atom());
+          break;
+        } else if(parse.state == ParsingState.NUMBER) {
+          parse.state = ParsingState.NONE;
+          parseNumber(currentVal, parse);
           break;
         }
       }
@@ -178,7 +209,7 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           parse.currentIndex++;
           break;
         } else if(parse.state == ParsingState.ATOM) {
-          parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
+          parse.matchValue = MatcherSupport.getMatcher(currentVal.atom());
           parse.currentIndex++;
           break;
         }
@@ -188,15 +219,40 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
           var newString: String = currentStr.substring(parse.currentIndex + 1);
           var tupleParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
           doEncode(tupleParse);
-          parse.currentIndex += tupleParse.currentIndex - 1;
+          parse.currentIndex += tupleParse.currentIndex;
           parse.matchValue.value.value.push(tupleParse.matchValue);
           continue;
         } else if(parse.state == ParsingState.LIST) {
           var newString: String = currentStr.substring(parse.currentIndex + 1);
           var listParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
           doEncode(listParse);
-          parse.currentIndex += listParse.currentIndex - 1;
+          parse.currentIndex += listParse.currentIndex;
           parse.matchValue.value.value.add(listParse.matchValue);
+          continue;
+        } else if(parse.state == ParsingState.MAP) {
+          var newString: String = currentStr.substring(parse.currentIndex + 1);
+          var mapKey: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          doEncode(mapKey);
+          parse.currentIndex += mapKey.currentIndex;
+          if(mapKey.matchValue == null) {
+            parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap<Dynamic, Dynamic>(), type: Types.MAP});
+            continue;
+          }
+
+          var key: Dynamic = mapKey.matchValue.value;
+          if(Std.is(key, String)) {
+            parse.matchValue.value = {value: new StringMap<MatchValue>(), type: Types.MAP};
+          } else {
+            parse.matchValue.value = {value: new ObjectMap<Dynamic, MatchValue>(), type: Types.MAP};
+          }
+
+          var newString: String = currentStr.substring(parse.currentIndex + 5);
+          var mapValue: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
+          doEncode(mapValue);
+          parse.currentIndex += mapValue.currentIndex + 4;
+
+          var map: Map<Dynamic, Dynamic> = parse.matchValue.value.value;
+          map.set(mapKey.matchValue.value, MatcherSupport.getMatcher(mapValue.matchValue.value));
           continue;
         } else if(parse.state == ParsingState.ATOM) {
           parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
