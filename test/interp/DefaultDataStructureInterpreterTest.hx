@@ -41,6 +41,7 @@ class DefaultDataStructureInterpreterTest {
 
     interp = new DefaultDataStructureInterpreter();
     interp.init();
+    interp.stringDecoder = new StringDecoder();
   }
 
   @After
@@ -51,18 +52,18 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldEncodeStringWithIntegerConstant(): Void {
-    var left: MatchValue = interp.encode("  143\n");
+    var left: MatchValue = interp.decode("  143\n");
     var right: Int = 143;
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
 
-    var left: MatchValue = interp.encode("  -143\n");
+    var left: MatchValue = interp.decode("  -143\n");
     var right: Int = -143;
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
   @Test
   public function shouldEncodeStringWithIntegerConstantAndBackToString(): Void {
-    var left: MatchValue = interp.encode("\n\t  \n143  \t");
+    var left: MatchValue = interp.decode("\n\t  \n143  \t");
     var right: Int = 143;
     Assert.areEqual(interp.toString(left), "143");
   }
@@ -70,7 +71,7 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldThrowExceptionIfUnableToInterpretNumberString(): Void {
     try {
-      interp.encode("dad143f");
+      interp.decode("dad143f");
       Assert.isTrue(false);
     } catch(e: UnableToInterpretStringError) {
       Assert.isTrue(true);
@@ -79,7 +80,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldEncodeStringWithStringConstant(): Void {
-    var left: MatchValue = interp.encode("\"  \n anna is watching 2 tv's \t\"");
+    var left: MatchValue = interp.decode("\"  \n anna is watching 2 tv's \t\"");
     var right: String = "  \n anna is watching 2 tv's \t";
     Assert.areEqual(left.value, right);
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
@@ -87,17 +88,17 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldEncodeStringWithNumberAsStringConstant(): Void {
-    var left: MatchValue = interp.encode("\"4356\"");
+    var left: MatchValue = interp.decode("\"4356\"");
     var right: String = "4356";
     Assert.areEqual(left.value, right);
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
 
-    var left: MatchValue = interp.encode("\"0\"");
+    var left: MatchValue = interp.decode("\"0\"");
     var right: String = "0";
     Assert.areEqual(left.value, right);
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
 
-    var left: MatchValue = interp.encode("\"-143\"");
+    var left: MatchValue = interp.decode("\"-143\"");
     var right: String = "-143";
     Assert.areEqual(left.value, right);
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
@@ -113,7 +114,7 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldThrowExceptionIfUnableToInterpretString(): Void {
     try {
-      interp.encode("\"dad143f");
+      interp.decode("\"dad143f");
       Assert.isTrue(false);
     } catch(e: UnableToInterpretStringError) {
       Assert.isTrue(true);
@@ -122,14 +123,14 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldEncodeStringWithFloatConstant(): Void {
-    var left: MatchValue = interp.encode("1.43");
+    var left: MatchValue = interp.decode("1.43");
     var right: Float = 1.43;
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
   @Test
   public function shouldEncodeStringWithFloatConstantAndBackToString(): Void {
-    var left: MatchValue = interp.encode("1.43");
+    var left: MatchValue = interp.decode("1.43");
     var right: Float = 1.43;
     Assert.areEqual(interp.toString(left), "1.43");
   }
@@ -137,13 +138,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldThrowExceptionIfUnableToInterpretFloatString(): Void {
     try {
-      interp.encode("e1.a43");
+      interp.decode("e1.a43");
       Assert.isTrue(false);
     } catch(e: UnableToInterpretStringError) {
       Assert.isTrue(true);
     }
     try {
-      interp.encode("fda1.43");
+      interp.decode("fda1.43");
       Assert.isTrue(false);
     } catch(e: UnableToInterpretStringError) {
       Assert.isTrue(true);
@@ -152,14 +153,14 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldParseAtomString(): Void {
-    var left: MatchValue = interp.encode(":anna");
+    var left: MatchValue = interp.decode(":anna");
     var right: Atom = {value: "anna", type: Types.ATOM};
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
   @Test
   public function shouldParseAtomWithQuotesAndSpaces(): Void {
-    var left: MatchValue = interp.encode(":\"anna is so sweet\"");
+    var left: MatchValue = interp.decode(":\"anna is so sweet\"");
     var right: Atom = {value: "anna is so sweet", type: Types.ATOM};
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
@@ -174,7 +175,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateAnEmptyTuple(): Void {
-    var left: MatchValue = interp.encode("{}");
+    var left: MatchValue = interp.decode("{}");
     var right: Tuple = {value: [], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -182,7 +183,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateATupleWithASingleStringElement(): Void {
-    var left: MatchValue = interp.encode("{\"foo\"}");
+    var left: MatchValue = interp.decode("{\"foo\"}");
     var right: Tuple = {value: ["foo"], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -190,7 +191,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateATupleWithManyElementsAndTypes(): Void {
-    var left: MatchValue = interp.encode("{\"foo\", 385, :anna}");
+    var left: MatchValue = interp.decode("{\"foo\", 385, :anna}");
     var right: Tuple = {value: ["foo", 385, "anna".atom()], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -198,7 +199,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateATupleManyStrings(): Void {
-    var left: MatchValue = interp.encode("{\"foo\", \"bar\", \"anna\"}");
+    var left: MatchValue = interp.decode("{\"foo\", \"bar\", \"anna\"}");
     var right: Tuple = {value: ["foo", "bar", "anna"], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -206,7 +207,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateATupleManyAtoms(): Void {
-    var left: MatchValue = interp.encode("{:foo, :\"anna\", :bar}");
+    var left: MatchValue = interp.decode("{:foo, :\"anna\", :bar}");
     var right: Tuple = {value: ["foo".atom(), "anna".atom(), "bar".atom()], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -214,7 +215,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateATupleManyNumbers(): Void {
-    var left: MatchValue = interp.encode("{100, 3490, 4939.34, 489, 950}");
+    var left: MatchValue = interp.decode("{100, 3490, 4939.34, 489, 950}");
     var right: Tuple = {value: [100, 3490, 4939.34, 489, 950], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -222,7 +223,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateTypeWithNestedTuple(): Void {
-    var left: MatchValue = interp.encode("{{}}");
+    var left: MatchValue = interp.decode("{{}}");
     var right: Tuple = {value: [{value: [], type: Types.TUPLE}], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -230,7 +231,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateTypeWithNestedTupleValue(): Void {
-    var left: MatchValue = interp.encode("{{1,2,3},{4,5,6}}");
+    var left: MatchValue = interp.decode("{{1,2,3},{4,5,6}}");
     var right: Tuple = {value: [{value: [1,2,3], type: Types.TUPLE},{value: [4,5,6], type: Types.TUPLE}], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -238,7 +239,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateEmptyList():Void {
-    var left: MatchValue = interp.encode("[]");
+    var left: MatchValue = interp.decode("[]");
     var rightList:List<Dynamic> = new List<Dynamic>();
     var right:LinkedList = {value: rightList, type: Types.LIST};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
@@ -247,7 +248,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithStringValues():Void {
-    var left: MatchValue = interp.encode("[\"anna\", \"food\", \"bar\"]");
+    var left: MatchValue = interp.decode("[\"anna\", \"food\", \"bar\"]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add("anna");
@@ -260,7 +261,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithAtomValues():Void {
-    var left: MatchValue = interp.encode("[:\"anna\", :\"food\", :bar]");
+    var left: MatchValue = interp.decode("[:\"anna\", :\"food\", :bar]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add("anna".atom());
@@ -273,7 +274,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithNumberValues():Void {
-    var left: MatchValue = interp.encode("[315, 621.64, 3492]");
+    var left: MatchValue = interp.decode("[315, 621.64, 3492]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add(315);
@@ -286,7 +287,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithAtoms():Void {
-    var left: MatchValue = interp.encode("[:anna, :loves, :\"food\"]");
+    var left: MatchValue = interp.decode("[:anna, :loves, :\"food\"]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add({value: "anna", type: Types.ATOM});
@@ -299,7 +300,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithAtomsStringsAndNumbers():Void {
-    var left: MatchValue = interp.encode("[:anna, :loves, 25, \"food\"]");
+    var left: MatchValue = interp.decode("[:anna, :loves, 25, \"food\"]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add({value: "anna", type: Types.ATOM});
@@ -313,7 +314,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithNumbers():Void {
-    var left: MatchValue = interp.encode("[-321, 25, 0, 43.243]");
+    var left: MatchValue = interp.decode("[-321, 25, 0, 43.243]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add(-321);
@@ -327,7 +328,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithAtomsStringsNumbersTuplesAndLists():Void {
-    var left: MatchValue = interp.encode("[:anna, {:loves, 25, [\"food\"]}]");
+    var left: MatchValue = interp.decode("[:anna, {:loves, 25, [\"food\"]}]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add({value: "anna", type: Types.ATOM});
@@ -342,7 +343,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateEmptyMap(): Void {
-    var left: MatchValue = interp.encode("%{}");
+    var left: MatchValue = interp.decode("%{}");
     var rightMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
@@ -351,7 +352,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateMapWithStringKeys(): Void {
-    var left: MatchValue = interp.encode("%{\"anna\" => \"food\"}");
+    var left: MatchValue = interp.decode("%{\"anna\" => \"food\"}");
     var rightMap:Map<String, Dynamic> = new Map<String, Dynamic>();
     rightMap.set("anna", "food");
     var right:MatchStringMap = {value: rightMap, type: Types.MAP};
@@ -361,7 +362,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateMapWithAtomKeys(): Void {
-    var left: MatchValue = interp.encode("%{:\"anna\" => \"food\"}");
+    var left: MatchValue = interp.decode("%{:\"anna\" => \"food\"}");
     var rightMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
     rightMap.set("anna".atom(), "food");
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
@@ -371,7 +372,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateMapWithMultipleAtomKeys(): Void {
-    var left: MatchValue = interp.encode("%{:anna => \"food\", :foo => \"bar\"}");
+    var left: MatchValue = interp.decode("%{:anna => \"food\", :foo => \"bar\"}");
     var rightMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
     rightMap.set("anna".atom(), "food");
     rightMap.set("foo".atom(), "bar");
@@ -382,7 +383,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateMapWithComplexValues(): Void {
-    var left: MatchValue = interp.encode("%{:anna => \"food\", :bar => [1, 2, {:a, :b, :c}], :baz => %{}}");
+    var left: MatchValue = interp.decode("%{:anna => \"food\", :bar => [1, 2, {:a, :b, :c}], :baz => %{}}");
 
     var barTuple: Tuple = {value: [{value: ["a".atom(), "b".atom(), "c".atom()], type: Types.TUPLE}], type: Types.TUPLE};
     var barList:List<Dynamic> = new List<Dynamic>();
