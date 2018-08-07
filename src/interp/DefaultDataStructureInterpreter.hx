@@ -8,6 +8,9 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
   @inject
   public var stringDecoder: StringDecoder;
 
+  @inject
+  public var stringEncoder: StringEncoder;
+
   public function new() {
   }
 
@@ -22,7 +25,6 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
   }
 
   public function toString(data:MatchValue):String {
-    var retVal = '${data.value}';
-    return retVal;
+    return stringEncoder.toString(data);
   }
 }

@@ -132,7 +132,9 @@ class StringDecoder implements DataStructureInterpreter {
           var tupleParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
           doEncode(tupleParse);
           parse.currentIndex += tupleParse.currentIndex;
-          parse.matchValue.value.value.push(tupleParse.matchValue);
+          if(tupleParse.matchValue != null) {
+            parse.matchValue.value.value.push(tupleParse.matchValue);
+          }
           continue;
         } else if(parse.state == ParsingState.MAP) {
           parse.matchValue = MatcherSupport.getComplexMatcher({value: null, type: Types.MAP});
@@ -252,9 +254,10 @@ class StringDecoder implements DataStructureInterpreter {
       parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap<Dynamic, Dynamic>(), type: Types.MAP});
     } else {
       var key: Dynamic = mapKey.matchValue.value;
-      if(Std.is(key, String)) {
+      var map = parse.matchValue.value.value;
+      if(Std.is(key, String) && map == null) {
         parse.matchValue.value = {value: new StringMap<MatchValue>(), type: Types.MAP};
-      } else {
+      } else if(map == null) {
         parse.matchValue.value = {value: new ObjectMap<Dynamic, MatchValue>(), type: Types.MAP};
       }
 
@@ -264,7 +267,11 @@ class StringDecoder implements DataStructureInterpreter {
       parse.currentIndex += mapValue.currentIndex + 4;
 
       var map: Map<Dynamic, Dynamic> = parse.matchValue.value.value;
-      map.set(mapKey.matchValue.value, MatcherSupport.getMatcher(mapValue.matchValue.value));
+      if(Reflect.hasField(mapValue.matchValue.value, "value")) {
+        map.set(mapKey.matchValue.value, MatcherSupport.getComplexMatcher(mapValue.matchValue.value));
+      } else {
+        map.set(mapKey.matchValue.value, MatcherSupport.getMatcher(mapValue.matchValue.value));
+      }
     }
   }
 
