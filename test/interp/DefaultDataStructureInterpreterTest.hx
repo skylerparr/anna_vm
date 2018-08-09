@@ -552,4 +552,11 @@ class DefaultDataStructureInterpreterTest {
     Assert.areEqual(interp.toString(left), '%{:baz => %{}, :anna => "food", :bar => [1, 2, {:a, :b, :c}]}');
   }
 
+  @Test
+  public function shouldComplexTupleFromStringBackToString(): Void {
+    var string: String = "{:add, [:native], [1, 1]}";
+    var left: MatchValue = interp.decode(string);
+    Assert.areEqual(interp.toString(left), string);
+  }
+
 }

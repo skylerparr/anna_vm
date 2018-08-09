@@ -1,6 +1,7 @@
 import massive.munit.TestSuite;
 
 import core.ObjectFactoryTest;
+import exec.DefaultTermExecuterTest;
 import interp.DefaultDataStructureInterpreterTest;
 import lang.HashTableAtomsTest;
 import matcher.DefaultMatcherTest;
@@ -25,6 +26,7 @@ class TestSuite extends massive.munit.TestSuite
 		super();
 
 		add(core.ObjectFactoryTest);
+		add(exec.DefaultTermExecuterTest);
 		add(interp.DefaultDataStructureInterpreterTest);
 		add(lang.HashTableAtomsTest);
 		add(matcher.DefaultMatcherTest);

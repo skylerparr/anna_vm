@@ -191,7 +191,7 @@ class StringDecoder implements DataStructureInterpreter {
           var newString: String = currentStr.substring(parse.currentIndex + 1);
           var listParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
           doEncode(listParse);
-          parse.currentIndex += listParse.currentIndex;
+          parse.currentIndex += listParse.currentIndex - 1;
           if(listParse.matchValue != null) {
             parse.matchValue.value.value.add(listParse.matchValue);
           }
@@ -235,7 +235,7 @@ class StringDecoder implements DataStructureInterpreter {
           parseMap(currentStr, parse);
           continue;
         } else if(parse.state == ParsingState.ATOM) {
-          parse.matchValue = MatcherSupport.getMatcher({value: currentVal, type: Types.ATOM});
+          parse.matchValue = MatcherSupport.getMatcher(currentVal.atom());
           break;
         } else if(parse.state == ParsingState.NUMBER) {
           parseNumber(currentVal, parse);

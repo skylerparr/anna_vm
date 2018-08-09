@@ -7,6 +7,7 @@
 -lib continuation
 -lib hxcpp-debugger
 -lib haxe-strings
+-lib haxe-concurrent
 --macro mcover.MCover.coverage([''],['src'],[])
 -D MCOVER
 -cp src
