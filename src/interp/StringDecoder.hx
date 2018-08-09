@@ -1,4 +1,5 @@
 package interp;
+import util.MapUtil;
 import error.UnsupportedError;
 import lang.MatchValue;
 import error.UnableToInterpretStringError;
@@ -19,6 +20,7 @@ enum ParsingState {
   TUPLE;
   LIST;
   MAP;
+  VARIABLE;
 }
 
 typedef Parse = {
@@ -79,6 +81,17 @@ class StringDecoder implements DataStructureInterpreter {
         } else if(parse.state == ParsingState.ATOM) {
           parse.matchValue = MatcherSupport.getMatcher(currentVal.atom());
           break;
+        } else if(parse.state == ParsingState.VARIABLE) {
+          parse.state = ParsingState.NONE;
+          parse.matchValue = MatcherSupport.getMatcherAssign(currentVal.trim());
+          break;
+        }
+      }
+      if(string.match(char)) {
+        if(parse.state == ParsingState.NONE) {
+          parse.state = ParsingState.VARIABLE;
+          currentVal = currentVal + char;
+          continue;
         }
       }
       if(number.match(char)) {
@@ -89,6 +102,8 @@ class StringDecoder implements DataStructureInterpreter {
         } else if(parse.state == ParsingState.NONE) {
           currentVal = currentVal + char;
           continue;
+        } else if(parse.state == ParsingState.VARIABLE) {
+          throw new UnableToInterpretStringError('Unexpected character');
         }
       }
       if(char == QUOTE) {
@@ -162,6 +177,10 @@ class StringDecoder implements DataStructureInterpreter {
           parse.state = ParsingState.NONE;
           parseNumber(currentVal, parse);
           break;
+        } else if(parse.state == ParsingState.VARIABLE) {
+          parse.state = ParsingState.NONE;
+          parse.matchValue = MatcherSupport.getMatcherAssign(currentVal.trim());
+          break;
         }
       }
       if(char == OPEN_BRACKET) {
@@ -185,11 +204,14 @@ class StringDecoder implements DataStructureInterpreter {
           break;
         } else if(parse.state == ParsingState.LIST) {
           parse.state = ParsingState.NONE;
-          parse.matchValue = parse.matchValue;
           parse.currentIndex++;
           break;
         } else if(parse.state == ParsingState.ATOM) {
           parse.matchValue = MatcherSupport.getMatcher(currentVal.atom());
+          parse.currentIndex++;
+          break;
+        } else if(parse.state == ParsingState.VARIABLE) {
+          parse.matchValue = MatcherSupport.getMatcherAssign(currentVal.trim());
           parse.currentIndex++;
           break;
         }
@@ -217,6 +239,9 @@ class StringDecoder implements DataStructureInterpreter {
           break;
         } else if(parse.state == ParsingState.NUMBER) {
           parseNumber(currentVal, parse);
+          break;
+        } else if(parse.state == ParsingState.VARIABLE) {
+          parse.matchValue = MatcherSupport.getMatcherAssign(currentVal.trim());
           break;
         }
       }
@@ -269,8 +294,10 @@ class StringDecoder implements DataStructureInterpreter {
       var map: Map<Dynamic, Dynamic> = parse.matchValue.value.value;
       if(Reflect.hasField(mapValue.matchValue.value, "value")) {
         map.set(mapKey.matchValue.value, MatcherSupport.getComplexMatcher(mapValue.matchValue.value));
-      } else {
+      } else if(mapValue.matchValue.varName == "") {
         map.set(mapKey.matchValue.value, MatcherSupport.getMatcher(mapValue.matchValue.value));
+      } else if(mapValue.matchValue.varName != "") {
+        map.set(mapKey.matchValue.value, mapValue.matchValue);
       }
     }
   }

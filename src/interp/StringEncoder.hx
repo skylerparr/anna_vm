@@ -20,8 +20,9 @@ class StringEncoder implements DataStructureInterpreter {
         retVal = parseConstant(data.value);
       case MatchType.COMPLEX:
         retVal = parseComplex(data.value);
-      case MatchType.HEAD_TAIL:
       case MatchType.VARIABLE:
+        retVal = parseVariable(data.varName);
+      case MatchType.HEAD_TAIL:
     }
     return retVal;
   }
@@ -36,6 +37,10 @@ class StringEncoder implements DataStructureInterpreter {
       retVal = '${value}';
     }
     return retVal;
+  }
+
+  private inline function parseVariable(value: Dynamic): String {
+    return '{:${value}, [], :var}';
   }
 
   private inline function parseComplex(value: Dynamic): String {
@@ -61,7 +66,7 @@ class StringEncoder implements DataStructureInterpreter {
     return retVal;
   }
 
-  private inline function gatherNested(items: Iterable<Dynamic>): String {
+  private function gatherNested(items: Iterable<Dynamic>): String {
     var strings: Array<String> = [];
     for(item in items) {
       strings.push(toString(item));

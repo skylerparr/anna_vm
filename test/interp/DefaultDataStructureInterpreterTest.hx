@@ -1,5 +1,6 @@
 package interp;
 
+import lang.MatchData;
 import util.MapUtil;
 import util.MapUtil;
 import util.MapUtil;
@@ -169,14 +170,14 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseAtomString(): Void {
     var left: MatchValue = interp.decode(":anna");
-    var right: Atom = {value: "anna", type: Types.ATOM};
+    var right: Atom = "anna".atom();
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
   @Test
   public function shouldParseAtomWithQuotesAndSpaces(): Void {
     var left: MatchValue = interp.decode(":\"anna is so sweet\"");
-    var right: Atom = {value: "anna is so sweet", type: Types.ATOM};
+    var right: Atom = "anna is so sweet".atom();
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
@@ -185,6 +186,22 @@ class DefaultDataStructureInterpreterTest {
     var string: String = ":anna";
     var left: MatchValue = interp.decode(string);
     Assert.areEqual(interp.toString(left), string);
+  }
+
+  @Test
+  public function shouldCreateVariable(): Void {
+    var left: MatchValue = interp.decode("anna");
+    var right: Int = 1;
+    var matchData: MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+    Assert.areEqual(matchData.matchedVars.get("anna"), 1);
+  }
+
+  @Test
+  public function shouldParseVariableAndBackToString(): Void {
+    var string: String = "anna";
+    var left: MatchValue = interp.decode(string);
+    Assert.areEqual(interp.toString(left), "{:anna, [], :var}");
   }
 
   @Test
@@ -200,6 +217,13 @@ class DefaultDataStructureInterpreterTest {
     var string: String = "{}";
     var left: MatchValue = interp.decode(string);
     Assert.areEqual(interp.toString(left), string);
+  }
+
+  @Test
+  public function shouldParseATupleWithVariableFromStringBackToString(): Void {
+    var string: String = "{anna}";
+    var left: MatchValue = interp.decode(string);
+    Assert.areEqual(interp.toString(left), "{{:anna, [], :var}}");
   }
 
   @Test
@@ -310,6 +334,13 @@ class DefaultDataStructureInterpreterTest {
   }
 
   @Test
+  public function shouldParseListWithVariableFromStringBackToString(): Void {
+    var string: String = "[anna, foo, bar]";
+    var left: MatchValue = interp.decode(string);
+    Assert.areEqual(interp.toString(left), "[{:anna, [], :var}, {:foo, [], :var}, {:bar, [], :var}]");
+  }
+
+  @Test
   public function shouldCreateListWithStringValues():Void {
     var left: MatchValue = interp.decode("[\"anna\", \"food\", \"bar\"]");
 
@@ -360,9 +391,9 @@ class DefaultDataStructureInterpreterTest {
     var left: MatchValue = interp.decode("[:anna, :loves, :\"food\"]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
-    rightList.add({value: "anna", type: Types.ATOM});
-    rightList.add({value: "loves", type: Types.ATOM});
-    rightList.add({value: "food", type: Types.ATOM});
+    rightList.add("anna".atom());
+    rightList.add("loves".atom());
+    rightList.add("food".atom());
     var right:LinkedList = {value: rightList, type: Types.LIST};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -373,8 +404,8 @@ class DefaultDataStructureInterpreterTest {
     var left: MatchValue = interp.decode("[:anna, :loves, 25, \"food\"]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
-    rightList.add({value: "anna", type: Types.ATOM});
-    rightList.add({value: "loves", type: Types.ATOM});
+    rightList.add("anna".atom());
+    rightList.add("loves".atom());
     rightList.add(25);
     rightList.add("food");
     var right:LinkedList = {value: rightList, type: Types.LIST};
@@ -401,10 +432,10 @@ class DefaultDataStructureInterpreterTest {
     var left: MatchValue = interp.decode("[:anna, {:loves, 25, [\"food\"]}]");
 
     var rightList:List<Dynamic> = new List<Dynamic>();
-    rightList.add({value: "anna", type: Types.ATOM});
+    rightList.add("anna".atom());
     var foodList:List<Dynamic> = new List<Dynamic>();
     foodList.add("food");
-    var tuple: Tuple = {value: [{value: "loves", type: Types.ATOM}, 25, {value: foodList, type: Types.LIST}], type: Types.TUPLE};
+    var tuple: Tuple = {value: ["loves".atom(), 25, {value: foodList, type: Types.LIST}], type: Types.TUPLE};
     rightList.add(tuple);
     var right:LinkedList = {value: rightList, type: Types.LIST};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
@@ -432,6 +463,13 @@ class DefaultDataStructureInterpreterTest {
     var string: String = "%{}";
     var left: MatchValue = interp.decode(string);
     Assert.areEqual(interp.toString(left), string);
+  }
+
+  @Test
+  public function shouldParseMapWithVariableFromStringBackToString(): Void {
+    var string: String = "%{:foo => bar}";
+    var left: MatchValue = interp.decode(string);
+    Assert.areEqual(interp.toString(left), "%{:foo => {:bar, [], :var}}");
   }
 
   @Test
