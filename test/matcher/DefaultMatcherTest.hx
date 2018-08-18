@@ -231,6 +231,16 @@ class DefaultMatcherTest {
   }
 
   @Test
+  public function shouldAssignReference():Void {
+    var left:MatchValue = getMatcherReference("my_atom");
+    var right:Atom = "true".atom();
+
+    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    Assert.isTrue(matchData.matched);
+    Assert.areEqual(right, matchData.matchedVars.get("my_atom"));
+  }
+
+  @Test
   public function shouldMatchOnEmptyList(): Void {
     var leftList:List<Dynamic> = new List<Dynamic>();
     var rightList:List<Dynamic> = new List<Dynamic>();
@@ -617,5 +627,9 @@ class DefaultMatcherTest {
 
   private function getMatcherAssign(varName:String):MatchValue {
     return {type: MatchType.VARIABLE, varName: varName, value: null};
+  }
+
+  private function getMatcherReference(varName:String):MatchValue {
+    return {type: MatchType.REFERENCE, varName: varName, value: null};
   }
 }

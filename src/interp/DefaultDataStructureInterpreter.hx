@@ -1,4 +1,5 @@
 package interp;
+
 import lang.MatchValue;
 
 using hx.strings.Strings;
@@ -20,8 +21,8 @@ class DefaultDataStructureInterpreter implements DataStructureInterpreter {
   public function dispose():Void {
   }
 
-  public function decode(data:String):MatchValue {
-    return stringDecoder.decode(data);
+  public function decode(data:String, scope: ExecutionScope):MatchValue {
+    return stringDecoder.decode(data, scope);
   }
 
   public function toString(data:MatchValue):String {

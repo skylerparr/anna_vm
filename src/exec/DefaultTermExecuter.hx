@@ -1,5 +1,7 @@
 package exec;
 
+import interp.ExecutionScope;
+import haxe.ds.StringMap;
 import lang.MatchValue;
 import lang.Types.Atom;
 import lang.Types.Tuple;
@@ -17,7 +19,7 @@ class DefaultTermExecuter implements TermExecuter {
   public function dispose():Void {
   }
 
-  public function execute(term:Tuple):MatchValue {
+  public function execute(term:Tuple, scope: ExecutionScope):MatchValue {
     var values: Array<Dynamic> = term.value;
     var operator: MatchValue = values[0];
     var context: MatchValue = values[1];

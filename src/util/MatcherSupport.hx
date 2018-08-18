@@ -14,4 +14,8 @@ class MatcherSupport {
   public static inline function getMatcherAssign(varName:String):MatchValue {
     return {type: MatchType.VARIABLE, varName: varName, value: null};
   }
+
+  public static inline function getMatcherReference(varName:String):MatchValue {
+    return {type: MatchType.REFERENCE, varName: varName, value: null};
+  }
 }

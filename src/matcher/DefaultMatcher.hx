@@ -35,6 +35,8 @@ class DefaultMatcher implements Matcher {
         matchData = matchComplex(left, right, scope, matchedVars);
       case MatchType.HEAD_TAIL:
         matchData = matchHeadTail(left, right, scope, matchedVars);
+      case MatchType.REFERENCE:
+        matchedVars.set(left.varName, right);
     }
     return matchData;
   }

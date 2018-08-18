@@ -1,4 +1,6 @@
 package interp;
+import lang.MatchType;
+import lang.MatchData;
 import util.MapUtil;
 import error.UnsupportedError;
 import lang.MatchValue;
@@ -21,6 +23,7 @@ enum ParsingState {
   LIST;
   MAP;
   VARIABLE;
+  REFERENCE;
 }
 
 typedef Parse = {
@@ -44,6 +47,9 @@ class StringDecoder implements DataStructureInterpreter {
   private static inline var OPEN_BRACKET: String = "[";
   private static inline var CLOSE_BRACKET: String = "]";
   private static inline var PERCENT: String = "%";
+  private static inline var HASH: String = "#";
+  private static inline var CHEVRON_OPEN: String = "<";
+  private static inline var CHEVRON_CLOSE: String = ">";
 
   public function new() {
   }
@@ -54,14 +60,14 @@ class StringDecoder implements DataStructureInterpreter {
   public function dispose():Void {
   }
 
-  public function decode(data:String):MatchValue {
+  public function decode(data:String, scope: ExecutionScope):MatchValue {
     data = data + " ";
     var parse: Parse = {string: data, origString: data, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-    doEncode(parse);
+    doEncode(parse, scope);
     return parse.matchValue;
   }
 
-  private inline function doEncode(parse: Parse): Void {
+  private inline function doEncode(parse: Parse, scope: ExecutionScope): Void {
     var currentStr: String = parse.string;
     var strLength: Int = currentStr.length;
 
@@ -116,7 +122,7 @@ class StringDecoder implements DataStructureInterpreter {
           break;
         } else if(parse.state == ParsingState.ATOM) {
           var atomParse: Parse = {string: currentStr.substring(parse.currentIndex), origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(atomParse);
+          doEncode(atomParse, scope);
           var atomName: String = atomParse.matchValue.value;
           var atom: Atom = atomName.atom();
           parse.matchValue = MatcherSupport.getMatcher(atom);
@@ -145,7 +151,7 @@ class StringDecoder implements DataStructureInterpreter {
           parse.matchValue = MatcherSupport.getComplexMatcher({value: [], type: Types.TUPLE});
           var newString: String = currentStr.substring(parse.currentIndex + 1);
           var tupleParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(tupleParse);
+          doEncode(tupleParse, scope);
           parse.currentIndex += tupleParse.currentIndex;
           if(tupleParse.matchValue != null) {
             parse.matchValue.value.value.push(tupleParse.matchValue);
@@ -153,7 +159,7 @@ class StringDecoder implements DataStructureInterpreter {
           continue;
         } else if(parse.state == ParsingState.MAP) {
           parse.matchValue = MatcherSupport.getComplexMatcher({value: null, type: Types.MAP});
-          parseMap(currentStr, parse);
+          parseMap(currentStr, parse, scope);
           continue;
         }
       }
@@ -190,7 +196,7 @@ class StringDecoder implements DataStructureInterpreter {
           parse.matchValue = MatcherSupport.getComplexMatcher({value: list, type: Types.LIST});
           var newString: String = currentStr.substring(parse.currentIndex + 1);
           var listParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(listParse);
+          doEncode(listParse, scope);
           parse.currentIndex += listParse.currentIndex - 1;
           if(listParse.matchValue != null) {
             parse.matchValue.value.value.add(listParse.matchValue);
@@ -220,19 +226,19 @@ class StringDecoder implements DataStructureInterpreter {
         if(parse.state == ParsingState.TUPLE) {
           var newString: String = currentStr.substring(parse.currentIndex + 1);
           var tupleParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(tupleParse);
+          doEncode(tupleParse, scope);
           parse.currentIndex += tupleParse.currentIndex;
           parse.matchValue.value.value.push(tupleParse.matchValue);
           continue;
         } else if(parse.state == ParsingState.LIST) {
           var newString: String = currentStr.substring(parse.currentIndex + 1);
           var listParse: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-          doEncode(listParse);
+          doEncode(listParse, scope);
           parse.currentIndex += listParse.currentIndex;
           parse.matchValue.value.value.add(listParse.matchValue);
           continue;
         } else if(parse.state == ParsingState.MAP) {
-          parseMap(currentStr, parse);
+          parseMap(currentStr, parse, scope);
           continue;
         } else if(parse.state == ParsingState.ATOM) {
           parse.matchValue = MatcherSupport.getMatcher(currentVal.atom());
@@ -249,6 +255,23 @@ class StringDecoder implements DataStructureInterpreter {
         if(parse.state == ParsingState.NONE) {
           parse.state = ParsingState.MAP;
         }
+      }
+      if(char == HASH) {
+        if(parse.state == ParsingState.NONE) {
+          parse.state = ParsingState.REFERENCE;
+          parse.matchValue = {type: MatchType.REFERENCE, varName: null, value: null};
+          continue;
+        }
+      }
+      if(char == CHEVRON_OPEN && parse.state == ParsingState.REFERENCE) {
+        parse.matchValue.value = currentVal;
+        currentVal = "";
+        continue;
+      }
+      if(char == CHEVRON_CLOSE && parse.state == ParsingState.REFERENCE) {
+        parse.matchValue.varName = currentVal;
+        parse.matchValue.value = scope.get(currentVal);
+        break;
       }
       currentVal = currentVal + char;
     }
@@ -270,10 +293,10 @@ class StringDecoder implements DataStructureInterpreter {
     }
   }
 
-  private inline function parseMap(currentStr: String, parse: Parse): Void {
+  private inline function parseMap(currentStr: String, parse: Parse, scope: ExecutionScope): Void {
     var newString: String = currentStr.substring(parse.currentIndex + 1);
     var mapKey: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-    doEncode(mapKey);
+    doEncode(mapKey, scope);
     parse.currentIndex += mapKey.currentIndex;
     if(mapKey.matchValue == null) {
       parse.matchValue = MatcherSupport.getComplexMatcher({value: new ObjectMap<Dynamic, Dynamic>(), type: Types.MAP});
@@ -288,7 +311,7 @@ class StringDecoder implements DataStructureInterpreter {
 
       var newString: String = currentStr.substring(parse.currentIndex + 5);
       var mapValue: Parse = {string: newString, origString: currentStr, currentIndex: -1, state: ParsingState.NONE, matchValue: null};
-      doEncode(mapValue);
+      doEncode(mapValue, scope);
       parse.currentIndex += mapValue.currentIndex + 4;
 
       var map: Map<Dynamic, Dynamic> = parse.matchValue.value.value;

@@ -1,5 +1,7 @@
 package interp;
 
+import lang.MatchType;
+import support.Foo;
 import lang.MatchData;
 import util.MapUtil;
 import util.MapUtil;
@@ -20,11 +22,14 @@ import massive.munit.Assert;
 import matcher.DefaultMatcher;
 
 using lang.AtomSupport;
+import mockatoo.Mockatoo.*;
+using mockatoo.Mockatoo;
 
 class DefaultDataStructureInterpreterTest {
 
   private var interp: DefaultDataStructureInterpreter;
   private var matcher: DefaultMatcher;
+  private var scope: ExecutionScope;
 
   @BeforeClass
   public function beforeClass():Void {
@@ -39,6 +44,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Before
   public function setup():Void {
+    scope = mock(ExecutionScope);
     matcher = new DefaultMatcher();
 
     interp = new DefaultDataStructureInterpreter();
@@ -60,26 +66,26 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldEncodeStringWithIntegerConstant(): Void {
-    var left: MatchValue = interp.decode("  143\n");
+    var left: MatchValue = interp.decode("  143\n", scope);
     var right: Int = 143;
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
 
-    var left: MatchValue = interp.decode("  -143\n");
+    var left: MatchValue = interp.decode("  -143\n", scope);
     var right: Int = -143;
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
   @Test
   public function shouldEncodeStringWithIntegerConstantAndBackToString(): Void {
-    var left: MatchValue = interp.decode("\n\t  \n143  \t");
+    var left: MatchValue = interp.decode("\n\t  \n143  \t", scope);
     var right: Int = 143;
     Assert.areEqual(interp.toString(left), "143");
 
-    var left: MatchValue = interp.decode("\n\t  \n-143  \t");
+    var left: MatchValue = interp.decode("\n\t  \n-143  \t", scope);
     var right: Int = -143;
     Assert.areEqual(interp.toString(left), "-143");
 
-    var left: MatchValue = interp.decode("\n\t  \n1.43  \t");
+    var left: MatchValue = interp.decode("\n\t  \n1.43  \t", scope);
     var right: Float = 1.43;
     Assert.areEqual(interp.toString(left), "1.43");
   }
@@ -87,7 +93,7 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldThrowExceptionIfUnableToInterpretNumberString(): Void {
     try {
-      interp.decode("dad143f");
+      interp.decode("dad143f", scope);
       Assert.isTrue(false);
     } catch(e: UnableToInterpretStringError) {
       Assert.isTrue(true);
@@ -96,7 +102,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldEncodeStringWithStringConstant(): Void {
-    var left: MatchValue = interp.decode("\"  \n anna is watching 2 tv's \t\"");
+    var left: MatchValue = interp.decode("\"  \n anna is watching 2 tv's \t\"", scope);
     var right: String = "  \n anna is watching 2 tv's \t";
     Assert.areEqual(left.value, right);
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
@@ -104,17 +110,17 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldEncodeStringWithNumberAsStringConstant(): Void {
-    var left: MatchValue = interp.decode("\"4356\"");
+    var left: MatchValue = interp.decode("\"4356\"", scope);
     var right: String = "4356";
     Assert.areEqual(left.value, right);
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
 
-    var left: MatchValue = interp.decode("\"0\"");
+    var left: MatchValue = interp.decode("\"0\"", scope);
     var right: String = "0";
     Assert.areEqual(left.value, right);
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
 
-    var left: MatchValue = interp.decode("\"-143\"");
+    var left: MatchValue = interp.decode("\"-143\"", scope);
     var right: String = "-143";
     Assert.areEqual(left.value, right);
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
@@ -123,14 +129,14 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldEncodeStringWithStringConstantAndBackToString(): Void {
     var string: String = "\"Anna is pretty\"";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldThrowExceptionIfUnableToInterpretString(): Void {
     try {
-      interp.decode("\"dad143f");
+      interp.decode("\"dad143f", scope);
       Assert.isTrue(false);
     } catch(e: UnableToInterpretStringError) {
       Assert.isTrue(true);
@@ -139,14 +145,14 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldEncodeStringWithFloatConstant(): Void {
-    var left: MatchValue = interp.decode("1.43");
+    var left: MatchValue = interp.decode("1.43", scope);
     var right: Float = 1.43;
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
   @Test
   public function shouldEncodeStringWithFloatConstantAndBackToString(): Void {
-    var left: MatchValue = interp.decode("1.43");
+    var left: MatchValue = interp.decode("1.43", scope);
     var right: Float = 1.43;
     Assert.areEqual(interp.toString(left), "1.43");
   }
@@ -154,13 +160,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldThrowExceptionIfUnableToInterpretFloatString(): Void {
     try {
-      interp.decode("e1.a43");
+      interp.decode("e1.a43", scope);
       Assert.isTrue(false);
     } catch(e: UnableToInterpretStringError) {
       Assert.isTrue(true);
     }
     try {
-      interp.decode("fda1.43");
+      interp.decode("fda1.43", scope);
       Assert.isTrue(false);
     } catch(e: UnableToInterpretStringError) {
       Assert.isTrue(true);
@@ -169,14 +175,14 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldParseAtomString(): Void {
-    var left: MatchValue = interp.decode(":anna");
+    var left: MatchValue = interp.decode(":anna", scope);
     var right: Atom = "anna".atom();
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
 
   @Test
   public function shouldParseAtomWithQuotesAndSpaces(): Void {
-    var left: MatchValue = interp.decode(":\"anna is so sweet\"");
+    var left: MatchValue = interp.decode(":\"anna is so sweet\"", scope);
     var right: Atom = "anna is so sweet".atom();
     Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
   }
@@ -184,13 +190,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseAtomStringAndBackToString(): Void {
     var string: String = ":anna";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateVariable(): Void {
-    var left: MatchValue = interp.decode("anna");
+    var left: MatchValue = interp.decode("anna", scope);
     var right: Int = 1;
     var matchData: MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -200,13 +206,27 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseVariableAndBackToString(): Void {
     var string: String = "anna";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), "{:anna, [], :var}");
   }
 
   @Test
+  public function shouldParseReferenceAndBackToString(): Void {
+    var scope: ExecutionScope = mock(ExecutionScope);
+    scope.get("0.123.0").returns(new Foo());
+
+    var string: String = "#support.Foo<0.123.0>";
+    var left: MatchValue = interp.decode(string, scope);
+    Assert.isNotNull(left.value);
+    Assert.isType(left.value, Foo);
+    Assert.areEqual(left.type, MatchType.REFERENCE);
+    Assert.areEqual(left.varName, "0.123.0");
+    Assert.areEqual(interp.toString(left), "#support.Foo<0.123.0>");
+  }
+
+  @Test
   public function shouldCreateAnEmptyTuple(): Void {
-    var left: MatchValue = interp.decode("{}");
+    var left: MatchValue = interp.decode("{}", scope);
     var right: Tuple = {value: [], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -215,20 +235,20 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseAnEmptyTupleFromStringBackToString(): Void {
     var string: String = "{}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldParseATupleWithVariableFromStringBackToString(): Void {
     var string: String = "{anna}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), "{{:anna, [], :var}}");
   }
 
   @Test
   public function shouldCreateATupleWithASingleStringElement(): Void {
-    var left: MatchValue = interp.decode("{\"foo\"}");
+    var left: MatchValue = interp.decode("{\"foo\"}", scope);
     var right: Tuple = {value: ["foo"], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -237,13 +257,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseATupleWithASingleElementFromStringBackToString(): Void {
     var string: String = "{\"foo\"}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateATupleWithManyElementsAndTypes(): Void {
-    var left: MatchValue = interp.decode("{\"foo\", 385, :anna}");
+    var left: MatchValue = interp.decode("{\"foo\", 385, :anna}", scope);
     var right: Tuple = {value: ["foo", 385, "anna".atom()], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -252,13 +272,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseATupleWithMultipleElementTypesFromStringBackToString(): Void {
     var string: String = "{\"foo\", 385, :anna}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateATupleManyStrings(): Void {
-    var left: MatchValue = interp.decode("{\"foo\", \"bar\", \"anna\"}");
+    var left: MatchValue = interp.decode("{\"foo\", \"bar\", \"anna\"}", scope);
     var right: Tuple = {value: ["foo", "bar", "anna"], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -266,7 +286,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateATupleManyAtoms(): Void {
-    var left: MatchValue = interp.decode("{:foo, :\"anna\", :bar}");
+    var left: MatchValue = interp.decode("{:foo, :\"anna\", :bar}", scope);
     var right: Tuple = {value: ["foo".atom(), "anna".atom(), "bar".atom()], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -275,13 +295,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseATupleWithMultipleAtomsFromStringBackToString(): Void {
     var string: String = "{:foo, :\"anna\", :bar}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), "{:foo, :anna, :bar}");
   }
 
   @Test
   public function shouldCreateATupleManyNumbers(): Void {
-    var left: MatchValue = interp.decode("{100, 3490, 4939.34, 489, 950}");
+    var left: MatchValue = interp.decode("{100, 3490, 4939.34, 489, 950}", scope);
     var right: Tuple = {value: [100, 3490, 4939.34, 489, 950], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -289,7 +309,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateTypeWithNestedTuple(): Void {
-    var left: MatchValue = interp.decode("{{}}");
+    var left: MatchValue = interp.decode("{{}}", scope);
     var right: Tuple = {value: [{value: [], type: Types.TUPLE}], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -298,13 +318,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseATupleWithNestedTuplesFromStringBackToString(): Void {
     var string: String = "{{}, {{}, {}}}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateTypeWithNestedTupleValue(): Void {
-    var left: MatchValue = interp.decode("{{1,2,3},{4,5,6}}");
+    var left: MatchValue = interp.decode("{{1,2,3},{4,5,6}}", scope);
     var right: Tuple = {value: [{value: [1,2,3], type: Types.TUPLE},{value: [4,5,6], type: Types.TUPLE}], type: Types.TUPLE};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
     Assert.isTrue(matchData.matched);
@@ -313,13 +333,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseATupleWithNestedTuplesWithValuesFromStringBackToString(): Void {
     var string: String = "{{1, 2, 3}, {4, 5, 6}}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateEmptyList():Void {
-    var left: MatchValue = interp.decode("[]");
+    var left: MatchValue = interp.decode("[]", scope);
     var rightList:List<Dynamic> = new List<Dynamic>();
     var right:LinkedList = {value: rightList, type: Types.LIST};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
@@ -329,20 +349,20 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseEmptyListFromStringBackToString(): Void {
     var string: String = "[]";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldParseListWithVariableFromStringBackToString(): Void {
     var string: String = "[anna, foo, bar]";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), "[{:anna, [], :var}, {:foo, [], :var}, {:bar, [], :var}]");
   }
 
   @Test
   public function shouldCreateListWithStringValues():Void {
-    var left: MatchValue = interp.decode("[\"anna\", \"food\", \"bar\"]");
+    var left: MatchValue = interp.decode("[\"anna\", \"food\", \"bar\"]", scope);
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add("anna");
@@ -356,13 +376,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseListWithValuesFromStringBackToString(): Void {
     var string: String = "[\"anna\", \"food\", \"bar\"]";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateListWithAtomValues():Void {
-    var left: MatchValue = interp.decode("[:\"anna\", :\"food\", :bar]");
+    var left: MatchValue = interp.decode("[:\"anna\", :\"food\", :bar]", scope);
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add("anna".atom());
@@ -375,7 +395,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithNumberValues():Void {
-    var left: MatchValue = interp.decode("[315, 621.64, 3492]");
+    var left: MatchValue = interp.decode("[315, 621.64, 3492]", scope);
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add(315);
@@ -388,7 +408,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithAtoms():Void {
-    var left: MatchValue = interp.decode("[:anna, :loves, :\"food\"]");
+    var left: MatchValue = interp.decode("[:anna, :loves, :\"food\"]", scope);
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add("anna".atom());
@@ -401,7 +421,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithAtomsStringsAndNumbers():Void {
-    var left: MatchValue = interp.decode("[:anna, :loves, 25, \"food\"]");
+    var left: MatchValue = interp.decode("[:anna, :loves, 25, \"food\"]", scope);
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add("anna".atom());
@@ -415,7 +435,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithNumbers():Void {
-    var left: MatchValue = interp.decode("[-321, 25, 0, 43.243]");
+    var left: MatchValue = interp.decode("[-321, 25, 0, 43.243]", scope);
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add(-321);
@@ -429,7 +449,7 @@ class DefaultDataStructureInterpreterTest {
 
   @Test
   public function shouldCreateListWithAtomsStringsNumbersTuplesAndLists():Void {
-    var left: MatchValue = interp.decode("[:anna, {:loves, 25, [\"food\"]}]");
+    var left: MatchValue = interp.decode("[:anna, {:loves, 25, [\"food\"]}]", scope);
 
     var rightList:List<Dynamic> = new List<Dynamic>();
     rightList.add("anna".atom());
@@ -445,13 +465,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseListWithMultipleValueTypesFromStringBackToString(): Void {
     var string: String = "[:anna, {:loves, 25, [\"food\"]}]";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateEmptyMap(): Void {
-    var left: MatchValue = interp.decode("%{}");
+    var left: MatchValue = interp.decode("%{}", scope);
     var rightMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
     var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
@@ -461,20 +481,20 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseEmptyMapFromStringBackToString(): Void {
     var string: String = "%{}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldParseMapWithVariableFromStringBackToString(): Void {
     var string: String = "%{:foo => bar}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), "%{:foo => {:bar, [], :var}}");
   }
 
   @Test
   public function shouldCreateMapWithStringKeys(): Void {
-    var left: MatchValue = interp.decode("%{\"anna\" => \"food\"}");
+    var left: MatchValue = interp.decode("%{\"anna\" => \"food\"}", scope);
     var rightMap:Map<String, Dynamic> = new Map<String, Dynamic>();
     rightMap.set("anna", "food");
     var right:MatchStringMap = {value: rightMap, type: Types.MAP};
@@ -485,13 +505,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseMapWithStringKeysFromStringBackToString(): Void {
     var string: String = "%{\"anna\" => \"food\"}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateMapWithAtomKeys(): Void {
-    var left: MatchValue = interp.decode("%{:\"anna\" => \"food\"}");
+    var left: MatchValue = interp.decode("%{:\"anna\" => \"food\"}", scope);
     var rightMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
     rightMap.set("anna".atom(), "food");
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
@@ -502,13 +522,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseMapWithAtomKeysFromStringBackToString(): Void {
     var string: String = "%{:anna => \"food\"}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 
   @Test
   public function shouldCreateMapWithMultipleAtomKeys(): Void {
-    var left: MatchValue = interp.decode("%{:anna => \"food\", :foo => \"bar\"}");
+    var left: MatchValue = interp.decode("%{:anna => \"food\", :foo => \"bar\"}", scope);
     var rightMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
     rightMap.set("anna".atom(), "food");
     rightMap.set("foo".atom(), "bar");
@@ -520,13 +540,13 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseMapWithMultpleAtomKeysFromStringBackToString(): Void {
     var string: String = "%{:anna => \"food\", :foo => \"bar\", :baz => \"cat\"}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), '%{:baz => "cat", :anna => "food", :foo => "bar"}');
   }
 
   @Test
   public function shouldCreateMapWithComplexValues(): Void {
-    var left: MatchValue = interp.decode("%{:anna => \"food\", :bar => [1, 2, {:a, :b, :c}], :baz => %{}}");
+    var left: MatchValue = interp.decode("%{:anna => \"food\", :bar => [1, 2, {:a, :b, :c}], :baz => %{}}", scope);
 
     var barTuple: Tuple = {value: [{value: ["a".atom(), "b".atom(), "c".atom()], type: Types.TUPLE}], type: Types.TUPLE};
     var barList:List<Dynamic> = new List<Dynamic>();
@@ -548,14 +568,14 @@ class DefaultDataStructureInterpreterTest {
   @Test
   public function shouldParseMapMapWithComplexValuesFromStringBackToString(): Void {
     var string: String = "%{:anna => \"food\", :bar => [1, 2, {:a, :b, :c}], :baz => %{}}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), '%{:baz => %{}, :anna => "food", :bar => [1, 2, {:a, :b, :c}]}');
   }
 
   @Test
   public function shouldComplexTupleFromStringBackToString(): Void {
     var string: String = "{:add, [:native], [1, 1]}";
-    var left: MatchValue = interp.decode(string);
+    var left: MatchValue = interp.decode(string, scope);
     Assert.areEqual(interp.toString(left), string);
   }
 

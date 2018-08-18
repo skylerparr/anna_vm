@@ -1,4 +1,5 @@
 package interp;
+import haxe.ds.StringMap;
 import lang.Types;
 import lang.MatchType;
 import error.UnsupportedError;
@@ -23,6 +24,8 @@ class StringEncoder implements DataStructureInterpreter {
       case MatchType.VARIABLE:
         retVal = parseVariable(data.varName);
       case MatchType.HEAD_TAIL:
+      case MatchType.REFERENCE:
+        retVal = parseReference(data);
     }
     return retVal;
   }
@@ -83,7 +86,12 @@ class StringEncoder implements DataStructureInterpreter {
     return strings.join(", ");
   }
 
-  public function decode(data:String):MatchValue {
+  private inline function parseReference(value: MatchValue): String {
+    var className: String = Type.getClassName(Type.getClass(value.value));
+    return '#${className}<${value.varName}>';
+  }
+
+  public function decode(data:String, scope: ExecutionScope):MatchValue {
     throw new UnsupportedError("Not implemented for this class");
   }
 }
