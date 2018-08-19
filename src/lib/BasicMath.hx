@@ -18,4 +18,8 @@ class BasicMath {
   public static function divide(left: Int, right: Int): Float {
     return left / right;
   }
+
+  public static function error(left: Int, right: Int): Float {
+    throw "Error";
+  }
 }

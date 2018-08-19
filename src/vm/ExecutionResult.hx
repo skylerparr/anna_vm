@@ -4,7 +4,6 @@ import lang.MatchValue;
 enum ResultType {
   CONSTANT;
   PUSH_STACK;
-  WAITING;
   ERROR;
 }
 

@@ -38,7 +38,7 @@ class SimpleProcess implements Process {
     var funStack: FunctionStack = new FunctionStack([term], scope);
     stack.add(funStack);
 
-    status = ProcessStatus.RUNNING;
+    status = ProcessStatus.WAITING;
   }
 
   public function dispose():Void {
@@ -51,9 +51,12 @@ class SimpleProcess implements Process {
   }
 
   public inline function execute():Void {
+    status = ProcessStatus.RUNNING;
+
     var functionStack: FunctionStack = stack.first();
     if(functionStack == null) {
-        kernel.endProcess(this);
+      kernel.endProcess(this);
+      status = ProcessStatus.STOPPED;
     } else {
       var term: MatchValue = functionStack.terms[functionStack.index];
 
@@ -72,9 +75,6 @@ class SimpleProcess implements Process {
             pushStack(functionStack, result);
           case ResultType.CONSTANT:
             functionStack.scope.put("$result$", result.value);
-          case ResultType.WAITING:
-            status = ProcessStatus.WAITING;
-            kernel.processWaiting(this);
           case ResultType.ERROR:
             status = ProcessStatus.STOPPED;
             kernel.processError(this);
@@ -101,6 +101,10 @@ class SimpleProcess implements Process {
 
   public function receiveMessage(matchValue:MatchValue):Void {
     mailbox.add(matchValue);
+  }
+
+  public function setWaiting():Void {
+    status = ProcessStatus.WAITING;
   }
 
 }

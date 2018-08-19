@@ -107,16 +107,6 @@ class SimpleProcessTest {
   }
 
   @Test
-  public function shouldNotifyKernelProcessIsWaitingForAMessage(): Void {
-    var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
-    var execResult: ExecutionResult = {type: ResultType.WAITING, value: {type: MatchType.CONSTANT, value: "nil".atom(), varName: null}};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
-    process.execute();
-    kernel.processWaiting(process).verify();
-    Assert.areEqual(ProcessStatus.WAITING, process.status);
-  }
-
-  @Test
   public function shouldPopTheStackBeforePushingTheStackIfAtTheEndOfTheStack(): Void {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var block: MatchValue = interp.decode("{:__block__, {{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}, {:add, {:native, :\"lib.BasicMath\"}, {1, 1}}, {:add, {:native, :\"lib.BasicMath\"}, {1, 1}}}}", emptyScope);
@@ -158,6 +148,16 @@ class SimpleProcessTest {
     Assert.isNull(process.stack);
     Assert.isNull(process.mailbox);
     Assert.areEqual(ProcessStatus.DESTROYED, process.status);
+  }
+
+  @Test
+  public function shouldSetProcessAsWaiting(): Void {
+    var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
+    var execResult: ExecutionResult = {type: ResultType.CONSTANT, value: {type: MatchType.CONSTANT, varName: null, value: 2}};
+    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    process.execute();
+    process.setWaiting();
+    Assert.areEqual(ProcessStatus.WAITING, process.status);
   }
 
   private inline function createProcess(matchValue: MatchValue): SimpleProcess {

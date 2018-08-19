@@ -8,9 +8,12 @@ import lang.AtomSupport;
 import lang.HashTableAtoms;
 import lang.MatchValue;
 import massive.munit.Assert;
+import vm.ExecutionResult;
+import vm.Kernel;
 
 import mockatoo.Mockatoo.*;
 using mockatoo.Mockatoo;
+using lang.AtomSupport;
 
 class DefaultTermExecuterTest {
 
@@ -18,6 +21,7 @@ class DefaultTermExecuterTest {
   private var interp: DefaultDataStructureInterpreter;
   private var encoder: StringEncoder;
   private var decoder: StringDecoder;
+  private var kernel: Kernel;
 
   @BeforeClass
   public function beforeClass():Void {
@@ -36,13 +40,15 @@ class DefaultTermExecuterTest {
     interp.stringDecoder = decoder;
     interp.stringEncoder = encoder;
 
+    kernel = mock(Kernel);
+
     termExecuter = new DefaultTermExecuter();
+    termExecuter.kernel = kernel;
     termExecuter.init();
   }
 
   @After
   public function tearDown():Void {
-    termExecuter.dispose();
     termExecuter = null;
   }
 
@@ -52,19 +58,66 @@ class DefaultTermExecuterTest {
 
     var scope: ExecutionScope = mock(ExecutionScope);
     var left: MatchValue = interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", scope);
-    var value: Dynamic = termExecuter.execute(left.value, scope, mailbox);
-    Assert.areEqual(value, 2);
+    var value: ExecutionResult = termExecuter.execute(left.value, scope, mailbox);
+    Assert.areEqual(value.value.value, 2);
 
     var left: MatchValue = interp.decode("{:subtract, {:native, :\"lib.BasicMath\"}, {1, 1}}", scope);
-    var value: Dynamic = termExecuter.execute(left.value, scope, mailbox);
-    Assert.areEqual(value, 0);
+    var value: ExecutionResult = termExecuter.execute(left.value, scope, mailbox);
+    Assert.areEqual(value.value.value, 0);
 
     var left: MatchValue = interp.decode("{:multiply, {:native, :\"lib.BasicMath\"}, {9, 9}}", scope);
-    var value: Dynamic = termExecuter.execute(left.value, scope, mailbox);
-    Assert.areEqual(value, 81);
+    var value: ExecutionResult = termExecuter.execute(left.value, scope, mailbox);
+    Assert.areEqual(value.value.value, 81);
 
     var left: MatchValue = interp.decode("{:divide, {:native, :\"lib.BasicMath\"}, {81, 9}}", scope);
-    var value: Dynamic = termExecuter.execute(left.value, scope, mailbox);
-    Assert.areEqual(value, 9);
+    var value: ExecutionResult = termExecuter.execute(left.value, scope, mailbox);
+    Assert.areEqual(value.value.value, 9);
   }
+
+  @Test
+  public function shouldInvokeANonNativeFunction(): Void {
+    var mailbox: List<MatchValue> = new List<MatchValue>();
+    var scope: ExecutionScope = mock(ExecutionScope);
+
+    var kernelResult: MatchValue = interp.decode("{:__block, {}}", scope);
+    kernel.apply("Foo".atom(), "bar".atom(), cast any).returns(kernelResult);
+
+    var scope: ExecutionScope = mock(ExecutionScope);
+    var left: MatchValue = interp.decode("{:Foo, {:anna, :bar, {}}", scope);
+    var value: ExecutionResult = termExecuter.execute(left.value, scope, mailbox);
+    Assert.areEqual(value.type, ResultType.PUSH_STACK);
+    Assert.areEqual(value.value, kernelResult);
+  }
+
+  @Test
+  public function shouldHandleErrorANonNativeFunction(): Void {
+    var mailbox: List<MatchValue> = new List<MatchValue>();
+    var scope: ExecutionScope = mock(ExecutionScope);
+
+    var kernelResult: MatchValue = interp.decode("{:__block, {}}", scope);
+    kernel.apply("Foo".atom(), "bar".atom(), cast any).throws("Bad Match");
+
+    var scope: ExecutionScope = mock(ExecutionScope);
+    var left: MatchValue = interp.decode("{:Foo, {:anna, :bar}, {}}", scope);
+    var value: ExecutionResult = termExecuter.execute(left.value, scope, mailbox);
+    Assert.areEqual(value.type, ResultType.ERROR);
+    Assert.areEqual(value.value.value, "Bad Match");
+  }
+
+  @Test
+  public function shouldReturnErrorOnError(): Void {
+    var mailbox: List<MatchValue> = new List<MatchValue>();
+    var scope: ExecutionScope = mock(ExecutionScope);
+
+    var left: MatchValue = interp.decode("{:error, {:native, :\"lib.BasicMath\"}, {81, 9}}", scope);
+    var value: ExecutionResult = termExecuter.execute(left.value, scope, mailbox);
+    Assert.areEqual(value.type, ResultType.ERROR);
+    Assert.isNotNull(value.value);
+
+    var left: MatchValue = interp.decode("{:kdasfjlsdf, {:native, :\"lib.BasicMath\"}, {81, 9}}", scope);
+    var value: ExecutionResult = termExecuter.execute(left.value, scope, mailbox);
+    Assert.areEqual(value.type, ResultType.ERROR);
+    Assert.isNotNull(value.value);
+  }
+
 }
