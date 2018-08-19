@@ -13,13 +13,13 @@ class DefaultTermExecuter implements TermExecuter {
   public function new() {
   }
 
-  public function init():Void {
+  public function init(args: Array<Dynamic> = null):Void {
   }
 
   public function dispose():Void {
   }
 
-  public function execute(term:Tuple, scope: ExecutionScope):MatchValue {
+  public function execute(term:Tuple, scope: ExecutionScope, mailbox: List<MatchValue>):MatchValue {
     var values: Array<Dynamic> = term.value;
     var operator: MatchValue = values[0];
     var context: MatchValue = values[1];

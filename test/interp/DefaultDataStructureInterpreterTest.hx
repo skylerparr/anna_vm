@@ -579,4 +579,11 @@ class DefaultDataStructureInterpreterTest {
     Assert.areEqual(interp.toString(left), string);
   }
 
+  @Test
+  public function shouldDispose(): Void {
+    interp.dispose();
+    Assert.isNull(interp.stringDecoder);
+    Assert.isNull(interp.stringEncoder);
+  }
+
 }

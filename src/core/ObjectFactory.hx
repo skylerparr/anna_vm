@@ -7,7 +7,7 @@ class ObjectFactory implements ObjectCreator {
     public function new() {
     }
 
-    public function createInstance(clazz:Class<Dynamic>, ?constructorArgs:Array<Dynamic>):Dynamic {
+    public function createInstance(clazz:Class<Dynamic>, ?constructorArgs:Array<Dynamic>, ?initArgs: Array<Dynamic>):Dynamic {
         if(constructorArgs == null) {
             constructorArgs = [];
         }
@@ -20,7 +20,7 @@ class ObjectFactory implements ObjectCreator {
         }
 
         if(Std.is(retVal, BaseObject)) {
-            retVal.init();
+            retVal.init(initArgs);
         }
 
         return retVal;

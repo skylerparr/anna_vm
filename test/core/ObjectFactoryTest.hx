@@ -119,7 +119,7 @@ class SampleBase implements BaseObject {
 
     }
 
-    public function init():Void {
+    public function init(args: Array<Dynamic> = null):Void {
         initialized = true;
     }
 

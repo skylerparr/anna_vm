@@ -52,21 +52,23 @@ class DefaultTermExecuterTest {
 
   @Test
   public function shouldInvokeANativeFunction():Void {
+    var mailbox: List<MatchValue> = new List<MatchValue>();
+
     var scope: ExecutionScope = mock(ExecutionScope);
-    var left: MatchValue = interp.decode("{:add, {:native, :\"lib.Kernel\"}, {1, 1}}", scope);
-    var value: Dynamic = termExecuter.execute(left.value, scope);
+    var left: MatchValue = interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", scope);
+    var value: Dynamic = termExecuter.execute(left.value, scope, mailbox);
     Assert.areEqual(value, 2);
 
-    var left: MatchValue = interp.decode("{:subtract, {:native, :\"lib.Kernel\"}, {1, 1}}", scope);
-    var value: Dynamic = termExecuter.execute(left.value, scope);
+    var left: MatchValue = interp.decode("{:subtract, {:native, :\"lib.BasicMath\"}, {1, 1}}", scope);
+    var value: Dynamic = termExecuter.execute(left.value, scope, mailbox);
     Assert.areEqual(value, 0);
 
-    var left: MatchValue = interp.decode("{:multiply, {:native, :\"lib.Kernel\"}, {9, 9}}", scope);
-    var value: Dynamic = termExecuter.execute(left.value, scope);
+    var left: MatchValue = interp.decode("{:multiply, {:native, :\"lib.BasicMath\"}, {9, 9}}", scope);
+    var value: Dynamic = termExecuter.execute(left.value, scope, mailbox);
     Assert.areEqual(value, 81);
 
-    var left: MatchValue = interp.decode("{:divide, {:native, :\"lib.Kernel\"}, {81, 9}}", scope);
-    var value: Dynamic = termExecuter.execute(left.value, scope);
+    var left: MatchValue = interp.decode("{:divide, {:native, :\"lib.BasicMath\"}, {81, 9}}", scope);
+    var value: Dynamic = termExecuter.execute(left.value, scope, mailbox);
     Assert.areEqual(value, 9);
   }
 }

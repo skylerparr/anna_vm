@@ -1,5 +1,5 @@
 package core;
 interface BaseObject {
-    function init(): Void;
+    function init(args: Array<Dynamic> = null): Void;
     function dispose(): Void;
 }

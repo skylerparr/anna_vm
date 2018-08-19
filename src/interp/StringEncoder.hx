@@ -8,7 +8,7 @@ class StringEncoder implements DataStructureInterpreter {
   public function new() {
   }
 
-  public function init():Void {
+  public function init(args: Array<Dynamic> = null):Void {
   }
 
   public function dispose():Void {

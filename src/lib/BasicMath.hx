@@ -1,5 +1,5 @@
 package lib;
-class Kernel {
+class BasicMath {
   public function new() {
   }
 
