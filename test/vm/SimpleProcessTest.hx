@@ -1,20 +1,17 @@
 package vm;
 
 import core.ObjectCreator;
-import lang.MatchType;
-import lang.MatchData;
-import lang.Types.Tuple;
-import interp.StringMapExecutionScope;
-import util.StackUtil;
-import massive.munit.Assert;
 import exec.TermExecuter;
 import interp.DefaultDataStructureInterpreter;
-import interp.ExecutionScope;
 import interp.StringDecoder;
 import interp.StringEncoder;
+import interp.StringMapExecutionScope;
 import lang.AtomSupport;
 import lang.HashTableAtoms;
+import lang.MatchType;
 import lang.MatchValue;
+import massive.munit.Assert;
+import util.StackUtil;
 import vm.ExecutionResult.ResultType;
 import mockatoo.Mockatoo.*;
 using mockatoo.Mockatoo;

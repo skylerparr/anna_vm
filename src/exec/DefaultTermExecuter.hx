@@ -1,7 +1,6 @@
 package exec;
 
 import interp.ExecutionScope;
-import haxe.ds.StringMap;
 import lang.MatchValue;
 import lang.Types.Atom;
 import lang.Types.Tuple;

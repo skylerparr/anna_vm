@@ -1,9 +1,8 @@
 package exec;
-import lang.MatchValue;
-import interp.ExecutionScope;
-import haxe.ds.StringMap;
-import lang.Types.Tuple;
 import core.BaseObject;
+import interp.ExecutionScope;
+import lang.MatchValue;
+import lang.Types.Tuple;
 interface TermExecuter extends BaseObject {
   function execute(term: Tuple, scope: ExecutionScope, mailbox: List<MatchValue>): Dynamic;
 }

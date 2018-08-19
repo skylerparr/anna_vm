@@ -1,17 +1,13 @@
 package exec;
 
+import interp.DefaultDataStructureInterpreter;
 import interp.ExecutionScope;
-import haxe.ds.StringMap;
-import lang.MatchValue;
 import interp.StringDecoder;
 import interp.StringEncoder;
-import interp.DefaultDataStructureInterpreter;
-import interp.DataStructureInterpreter;
 import lang.AtomSupport;
 import lang.HashTableAtoms;
-import massive.munit.util.Timer;
+import lang.MatchValue;
 import massive.munit.Assert;
-import massive.munit.async.AsyncFactory;
 
 import mockatoo.Mockatoo.*;
 using mockatoo.Mockatoo;
