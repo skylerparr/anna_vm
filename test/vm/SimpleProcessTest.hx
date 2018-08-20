@@ -57,6 +57,12 @@ class SimpleProcessTest {
   }
 
   @Test
+  public function shouldAddSelfToScopeByDefault(): Void {
+    var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
+    Assert.areEqual(emptyScope.get("$currentProcess$"), process);
+  }
+
+  @Test
   public function shouldNotifyKernelToRemoveProcessIfNoMoreTermsToExecute(): Void {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var execResult: ExecutionResult = {type: ResultType.CONSTANT, value: {type: MatchType.CONSTANT, varName: null, value: 2}};

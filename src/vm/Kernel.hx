@@ -7,6 +7,7 @@ import core.BaseObject;
 import lang.Types.Atom;
 
 interface Kernel extends BaseObject {
+  function spawnProcess(matchValue: MatchValue): Process;
   function endProcess(process: Process): Void;
   function processError(process: Process): Void;
 

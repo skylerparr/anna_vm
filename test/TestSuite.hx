@@ -12,6 +12,7 @@ import vm.terms.VMAtomTest;
 import vm.terms.VMUTF8AtomTest;
 import vm.SimpleProcessTest;
 import vm.DefaultSystemTest;
+import vm.DefaultKernelTest;
 import exec.DefaultTermExecuterTest;
 import lang.HashTableAtomsTest;
 import util.StackUtilTest;
@@ -40,6 +41,7 @@ class TestSuite extends massive.munit.TestSuite
 		add(vm.terms.VMUTF8AtomTest);
 		add(vm.SimpleProcessTest);
 		add(vm.DefaultSystemTest);
+		add(vm.DefaultKernelTest);
 		add(exec.DefaultTermExecuterTest);
 		add(lang.HashTableAtomsTest);
 		add(util.StackUtilTest);

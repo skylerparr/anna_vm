@@ -31,6 +31,7 @@ class SimpleProcess implements Process {
   public function init(args: Array<Dynamic> = null):Void {
     var term:MatchValue = args[0];
     var scope: ExecutionScope = args[1];
+    scope.put("$currentProcess$", this);
 
     stack = new GenericStack<FunctionStack>();
     mailbox = new List<MatchValue>();
@@ -87,6 +88,7 @@ class SimpleProcess implements Process {
   private inline function pushStack(functionStack: FunctionStack, result: ExecutionResult): Void {
     var results: Array<MatchValue> = cast result.value.value.value[1].value.value;
     var scope: ExecutionScope = objectCreator.createInstance(ExecutionScope);
+    scope.put("$currentProcess$", this);
     var terms: Array<MatchValue> = [];
     for(matchValue in results) {
       terms.push(matchValue);
