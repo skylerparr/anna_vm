@@ -1,5 +1,6 @@
 package exec;
 
+import vm.Process;
 import lang.MatchType;
 import vm.Kernel;
 import util.MatcherSupport;
@@ -25,7 +26,7 @@ class DefaultTermExecuter implements TermExecuter {
   public function dispose():Void {
   }
 
-  public function execute(term:Tuple, scope: ExecutionScope, mailbox: List<MatchValue>):ExecutionResult {
+  public function execute(term:Tuple, process: Process, scope: ExecutionScope, mailbox: List<MatchValue>):ExecutionResult {
     var values: Array<Dynamic> = term.value;
     var operator: MatchValue = values[0];
     var context: MatchValue = values[1];
@@ -36,7 +37,11 @@ class DefaultTermExecuter implements TermExecuter {
       var className: Dynamic = context.value.value[1].value.value;
       var clazz: Dynamic = Type.resolveClass(className);
       var fun = Reflect.field(clazz, operator.value.value);
-      var params: Array<Dynamic> = [args.value.value[0].value, args.value.value[1].value];
+      var params: Array<Dynamic> = [];
+      var argParams: Array<Dynamic> = cast args.value.value;
+      for(arg in argParams) {
+        params.push(arg.value);
+      }
       if(clazz != null && fun != null && params != null) {
         try {
           var funResult: Dynamic = Reflect.callMethod(clazz, fun, params);
@@ -53,7 +58,7 @@ class DefaultTermExecuter implements TermExecuter {
       var args: Tuple = term.value[2];
 
       try {
-        var funResult: MatchValue = kernel.apply(mod, fun, args);
+        var funResult: MatchValue = kernel.apply(process, mod, fun, args);
         return {type: ResultType.PUSH_STACK, value: funResult};
       } catch(e: Dynamic) {
         return {type: ResultType.ERROR, value: MatcherSupport.getMatcher(e)};

@@ -1,5 +1,7 @@
 package vm;
 
+import interp.DataStructureInterpreter;
+import support.InterpSupport;
 import core.ObjectCreator;
 import exec.TermExecuter;
 import interp.DefaultDataStructureInterpreter;
@@ -22,7 +24,7 @@ class SimpleProcessTest {
   private var process: SimpleProcess;
   private var termExecuter: TermExecuter;
   private var kernel: Kernel;
-  private var interp: DefaultDataStructureInterpreter;
+  private var interp: DataStructureInterpreter;
   private var emptyScope: StringMapExecutionScope;
   private var objectCreator: ObjectCreator;
 
@@ -39,10 +41,7 @@ class SimpleProcessTest {
 
   @Before
   public function setup():Void {
-    interp = new DefaultDataStructureInterpreter();
-    interp.stringDecoder = new StringDecoder();
-    interp.stringEncoder = new StringEncoder();
-    interp.init();
+    interp = InterpSupport.getInterpreter();
 
     objectCreator = mock(ObjectCreator);
     termExecuter = mock(TermExecuter);
@@ -66,7 +65,7 @@ class SimpleProcessTest {
   public function shouldNotifyKernelToRemoveProcessIfNoMoreTermsToExecute(): Void {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var execResult: ExecutionResult = {type: ResultType.CONSTANT, value: {type: MatchType.CONSTANT, varName: null, value: 2}};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     process.execute();
     kernel.endProcess(process).verify();
@@ -77,7 +76,7 @@ class SimpleProcessTest {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var block: MatchValue = interp.decode("{:__block__, {{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}, {:add, {:native, :\"lib.BasicMath\"}, {1, 1}}, {:add, {:native, :\"lib.BasicMath\"}, {1, 1}}}}", emptyScope);
     var execResult: ExecutionResult = {type: ResultType.PUSH_STACK, value: block};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     Assert.areEqual(1, StackUtil.length(cast process.stack));
   }
@@ -87,11 +86,11 @@ class SimpleProcessTest {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var block: MatchValue = interp.decode("{:__block__, {{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}, {:add, {:native, :\"lib.BasicMath\"}, {1, 1}}, {:add, {:native, :\"lib.BasicMath\"}, {1, 1}}}}", emptyScope);
     var execResult: ExecutionResult = {type: ResultType.PUSH_STACK, value: block};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     termExecuter.reset();
     var execResult:ExecutionResult = {type: ResultType.CONSTANT, value: {type: MatchType.CONSTANT, varName: null, value: 2}};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     process.execute();
     process.execute();
@@ -107,7 +106,7 @@ class SimpleProcessTest {
   public function shouldUpdateScopeVarsWithResult(): Void {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var execResult: ExecutionResult = {type: ResultType.CONSTANT, value: {type: MatchType.CONSTANT, varName: null, value: 2}};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     Assert.areEqual(2, emptyScope.get("$result$").value);
   }
@@ -117,11 +116,11 @@ class SimpleProcessTest {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var block: MatchValue = interp.decode("{:__block__, {{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}, {:add, {:native, :\"lib.BasicMath\"}, {1, 1}}, {:add, {:native, :\"lib.BasicMath\"}, {1, 1}}}}", emptyScope);
     var execResult: ExecutionResult = {type: ResultType.PUSH_STACK, value: block};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     termExecuter.reset();
     var execResult:ExecutionResult = {type: ResultType.CONSTANT, value: {type: MatchType.CONSTANT, varName: null, value: 2}};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     process.execute();
     Assert.areEqual(1, StackUtil.length(cast process.stack));
@@ -138,7 +137,7 @@ class SimpleProcessTest {
   public function shouldNotifyKernelIfErrorInProcess(): Void {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var execResult: ExecutionResult = {type: ResultType.ERROR, value: {type: MatchType.CONSTANT, varName: null, value: "Error"}};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     Assert.areEqual(ProcessStatus.STOPPED, process.status);
     kernel.processError(process).verify();
@@ -160,7 +159,7 @@ class SimpleProcessTest {
   public function shouldSetProcessAsWaiting(): Void {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var execResult: ExecutionResult = {type: ResultType.CONSTANT, value: {type: MatchType.CONSTANT, varName: null, value: 2}};
-    termExecuter.execute(cast any, cast any, cast any).returns(execResult);
+    termExecuter.execute(cast any, process, cast any, cast any).returns(execResult);
     process.execute();
     process.setWaiting();
     Assert.areEqual(ProcessStatus.WAITING, process.status);

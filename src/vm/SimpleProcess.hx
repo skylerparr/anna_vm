@@ -70,7 +70,7 @@ class SimpleProcess implements Process {
           }
         }
       } else {
-        var result: ExecutionResult = executer.execute(term.value, functionStack.scope, mailbox);
+        var result: ExecutionResult = executer.execute(term.value, this, functionStack.scope, mailbox);
         switch result.type {
           case ResultType.PUSH_STACK:
             pushStack(functionStack, result);

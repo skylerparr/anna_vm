@@ -1,5 +1,7 @@
 package vm;
 
+import vm.Process;
+import interp.ExecutionScope;
 import lang.MatchValue;
 import lang.MatchData;
 import lang.Types.Tuple;
@@ -7,10 +9,10 @@ import core.BaseObject;
 import lang.Types.Atom;
 
 interface Kernel extends BaseObject {
-  function spawnProcess(matchValue: MatchValue): Process;
+  function spawnProcess(process: Process, matchValue: MatchValue, scope: ExecutionScope): Process;
   function endProcess(process: Process): Void;
   function processError(process: Process): Void;
 
-  function apply(module: Atom, fun: Atom, args: Tuple): MatchValue;
+  function apply(process: Process, module: Atom, fun: Atom, args: Tuple): MatchValue;
   function receive(process: Process): MatchValue;
 }
