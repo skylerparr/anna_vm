@@ -51,19 +51,19 @@ class DefaultMatcherTest {
     var left:MatchValue = getMatcher(1);
     var right:Int = 1;
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
 
     var left:MatchValue = getMatcher(1.302948);
     var right:Float = 1.302948;
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
 
     var left:MatchValue = getMatcher("foo");
     var right:String = "foo";
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -72,7 +72,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getMatcher(1);
     var right:String = "foo";
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -81,7 +81,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getMatcherAssign("foo");
     var right:Int = 1;
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(matchData.matchedVars.get("foo"), 1);
   }
@@ -91,7 +91,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: [], type: Types.TUPLE});
     var right:Tuple = {value: [], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -100,7 +100,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: [getMatcher(1), getMatcher("foo"), getMatcher(123)], type: Types.TUPLE});
     var right:Tuple = {value: [1, "foo", 123], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -109,7 +109,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: [getMatcher("foo".atom()), getMatcher("anna".atom()), getMatcher("bar".atom())], type: Types.TUPLE});
     var right:Tuple = {value: ["foo".atom(), "anna".atom(), "bar".atom()], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -118,7 +118,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: [getMatcher(1), getMatcher("foo"), getMatcher({value: "anna", type: Types.ATOM})], type: Types.TUPLE});
     var right:Tuple = {value: [1, "foo", {value: "anna", type: Types.ATOM}], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -127,7 +127,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: [getMatcher("foo")], type: Types.TUPLE});
     var right:Tuple = {value: ["foo", 384, {value: "anna", type: Types.ATOM}], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -136,7 +136,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: {value: [getMatcher(1), getMatcher("foo"), getMatcher(123)], type: Types.TUPLE}});
     var right:Tuple = {value: [1, "bar", 123], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -145,7 +145,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: {value: [getMatcher(1), getMatcher("foo"), getMatcher(123)], type: Types.TUPLE}});
     var right:String = "bar";
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -154,7 +154,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: [getMatcher(1), getMatcherAssign("bar"), getMatcher(123)], type: Types.TUPLE});
     var right:Tuple = {value: [1, "foo", 123], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(matchData.matchedVars.get("bar"), "foo");
   }
@@ -164,7 +164,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher({value: [getMatcherAssign("number"), getMatcherAssign("words"), getMatcherAssign("bigger_number")], type: Types.TUPLE});
     var right:Tuple = {value: [1, "foo", 123], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(matchData.matchedVars.get("number"), 1);
     Assert.areEqual(matchData.matchedVars.get("words"), "foo");
@@ -176,7 +176,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getMatcherAssign("whole_tuple");
     var right:Tuple = {value: [1, "foo", 123], type: Types.TUPLE};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     var t:Tuple = matchData.matchedVars.get("whole_tuple");
     Assert.areEqual(t.type, Types.TUPLE);
@@ -191,7 +191,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getComplexMatcher(leftTuple);
 
     var right: Tuple = {value: [{value: "loves", type: Types.ATOM}, 25], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -200,13 +200,13 @@ class DefaultMatcherTest {
     var left:MatchValue = getMatcher("true".atom());
     var right:Atom = "true".atom();
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
 
     var left:MatchValue = getMatcher("anna".atom());
     var right:Atom = "anna".atom();
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -215,7 +215,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getMatcher("true".atom());
     var right:Atom = "false".atom();
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
     Assert.isNull(matchData.matchedVars);
   }
@@ -225,7 +225,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getMatcherAssign("my_atom");
     var right:Atom = "true".atom();
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(right, matchData.matchedVars.get("my_atom"));
   }
@@ -235,7 +235,7 @@ class DefaultMatcherTest {
     var left:MatchValue = getMatcherReference("my_atom");
     var right:Atom = "true".atom();
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(right, matchData.matchedVars.get("my_atom"));
   }
@@ -248,7 +248,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftList, type: Types.LIST}};
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -267,7 +267,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftList, type: Types.LIST}};
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -291,7 +291,7 @@ class DefaultMatcherTest {
     var tuple: Tuple = {value: [{value: "loves", type: Types.ATOM}, 25, {value: foodList, type: Types.LIST}], type: Types.TUPLE};
     rightList.add(tuple);
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -310,7 +310,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftList, type: Types.LIST}};
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -329,7 +329,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftList, type: Types.LIST}};
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(matchData.matchedVars.get("food"), "steak");
   }
@@ -345,7 +345,7 @@ class DefaultMatcherTest {
 
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
 
     var wholeList:List<Dynamic> = matchData.matchedVars.get("whole_list").value;
@@ -370,7 +370,7 @@ class DefaultMatcherTest {
 
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(matchData.matchedVars.get("food"), "steak");
   }
@@ -390,7 +390,7 @@ class DefaultMatcherTest {
 
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
     Assert.isNull(matchData.matchedVars);
   }
@@ -407,7 +407,7 @@ class DefaultMatcherTest {
 
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(matchData.matchedVars.get("head"), "steak");
     var tailList:List<Dynamic> = matchData.matchedVars.get("tail").value;
@@ -427,7 +427,7 @@ class DefaultMatcherTest {
 
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     var tailList:List<Dynamic> = matchData.matchedVars.get("tail").value;
     Assert.areEqual(tailList.pop(), "224");
@@ -452,7 +452,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftList, type: Types.LIST}};
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     var keyCount:Int = 0;
     for (i in matchData.matchedVars.keys()) {
@@ -481,7 +481,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftList, type: Types.LIST}};
     var right:LinkedList = {value: rightList, type: Types.LIST};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -493,7 +493,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -506,7 +506,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -520,7 +520,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
     var right:MatchStringMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -534,7 +534,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
     var right:MatchStringMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -551,7 +551,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
     var right:MatchStringMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -571,7 +571,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -591,7 +591,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isFalse(matchData.matched);
   }
 
@@ -611,7 +611,7 @@ class DefaultMatcherTest {
     var left:MatchValue = {type: MatchType.COMPLEX, varName: null, value: {value: leftMap, type: Types.MAP}};
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
 
     Assert.areEqual(matchData.matchedVars.get("foo"), "bar");

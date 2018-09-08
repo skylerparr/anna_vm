@@ -68,11 +68,11 @@ class DefaultDataStructureInterpreterTest {
   public function shouldEncodeStringWithIntegerConstant(): Void {
     var left: MatchValue = interp.decode("  143\n", scope);
     var right: Int = 143;
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
 
     var left: MatchValue = interp.decode("  -143\n", scope);
     var right: Int = -143;
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
   }
 
   @Test
@@ -91,21 +91,11 @@ class DefaultDataStructureInterpreterTest {
   }
 
   @Test
-  public function shouldThrowExceptionIfUnableToInterpretNumberString(): Void {
-    try {
-      interp.decode("dad143f", scope);
-      Assert.isTrue(false);
-    } catch(e: UnableToInterpretStringError) {
-      Assert.isTrue(true);
-    }
-  }
-
-  @Test
   public function shouldEncodeStringWithStringConstant(): Void {
     var left: MatchValue = interp.decode("\"  \n anna is watching 2 tv's \t\"", scope);
     var right: String = "  \n anna is watching 2 tv's \t";
     Assert.areEqual(left.value, right);
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
   }
 
   @Test
@@ -113,17 +103,17 @@ class DefaultDataStructureInterpreterTest {
     var left: MatchValue = interp.decode("\"4356\"", scope);
     var right: String = "4356";
     Assert.areEqual(left.value, right);
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
 
     var left: MatchValue = interp.decode("\"0\"", scope);
     var right: String = "0";
     Assert.areEqual(left.value, right);
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
 
     var left: MatchValue = interp.decode("\"-143\"", scope);
     var right: String = "-143";
     Assert.areEqual(left.value, right);
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
   }
 
   @Test
@@ -147,7 +137,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldEncodeStringWithFloatConstant(): Void {
     var left: MatchValue = interp.decode("1.43", scope);
     var right: Float = 1.43;
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
   }
 
   @Test
@@ -177,14 +167,14 @@ class DefaultDataStructureInterpreterTest {
   public function shouldParseAtomString(): Void {
     var left: MatchValue = interp.decode(":anna", scope);
     var right: Atom = "anna".atom();
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
   }
 
   @Test
   public function shouldParseAtomWithQuotesAndSpaces(): Void {
     var left: MatchValue = interp.decode(":\"anna is so sweet\"", scope);
     var right: Atom = "anna is so sweet".atom();
-    Assert.isTrue(matcher.match(left, right, new Map<String, Dynamic>()).matched);
+    Assert.isTrue(matcher.match(left, right).matched);
   }
 
   @Test
@@ -198,9 +188,18 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateVariable(): Void {
     var left: MatchValue = interp.decode("anna", scope);
     var right: Int = 1;
-    var matchData: MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData: MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
     Assert.areEqual(matchData.matchedVars.get("anna"), 1);
+  }
+
+  @Test
+  public function shouldCreateVariableWithANumberInIt(): Void {
+    var left: MatchValue = interp.decode("anna1", scope);
+    var right: Int = 1;
+    var matchData: MatchData = matcher.match(left, right);
+    Assert.isTrue(matchData.matched);
+    Assert.areEqual(matchData.matchedVars.get("anna1"), 1);
   }
 
   @Test
@@ -228,7 +227,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateAnEmptyTuple(): Void {
     var left: MatchValue = interp.decode("{}", scope);
     var right: Tuple = {value: [], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -250,7 +249,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateATupleWithASingleStringElement(): Void {
     var left: MatchValue = interp.decode("{\"foo\"}", scope);
     var right: Tuple = {value: ["foo"], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -265,7 +264,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateATupleWithManyElementsAndTypes(): Void {
     var left: MatchValue = interp.decode("{\"foo\", 385, :anna}", scope);
     var right: Tuple = {value: ["foo", 385, "anna".atom()], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -280,7 +279,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateATupleManyStrings(): Void {
     var left: MatchValue = interp.decode("{\"foo\", \"bar\", \"anna\"}", scope);
     var right: Tuple = {value: ["foo", "bar", "anna"], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -288,7 +287,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateATupleManyAtoms(): Void {
     var left: MatchValue = interp.decode("{:foo, :\"anna\", :bar}", scope);
     var right: Tuple = {value: ["foo".atom(), "anna".atom(), "bar".atom()], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -303,7 +302,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateATupleManyNumbers(): Void {
     var left: MatchValue = interp.decode("{100, 3490, 4939.34, 489, 950}", scope);
     var right: Tuple = {value: [100, 3490, 4939.34, 489, 950], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -311,7 +310,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateTypeWithNestedTuple(): Void {
     var left: MatchValue = interp.decode("{{}}", scope);
     var right: Tuple = {value: [{value: [], type: Types.TUPLE}], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -326,7 +325,7 @@ class DefaultDataStructureInterpreterTest {
   public function shouldCreateTypeWithNestedTupleValue(): Void {
     var left: MatchValue = interp.decode("{{1,2,3},{4,5,6}}", scope);
     var right: Tuple = {value: [{value: [1,2,3], type: Types.TUPLE},{value: [4,5,6], type: Types.TUPLE}], type: Types.TUPLE};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -342,7 +341,7 @@ class DefaultDataStructureInterpreterTest {
     var left: MatchValue = interp.decode("[]", scope);
     var rightList:List<Dynamic> = new List<Dynamic>();
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -369,7 +368,7 @@ class DefaultDataStructureInterpreterTest {
     rightList.add("food");
     rightList.add("bar");
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -389,7 +388,7 @@ class DefaultDataStructureInterpreterTest {
     rightList.add("food".atom());
     rightList.add("bar".atom());
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -402,7 +401,7 @@ class DefaultDataStructureInterpreterTest {
     rightList.add(621.64);
     rightList.add(3492);
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -415,7 +414,7 @@ class DefaultDataStructureInterpreterTest {
     rightList.add("loves".atom());
     rightList.add("food".atom());
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -429,7 +428,7 @@ class DefaultDataStructureInterpreterTest {
     rightList.add(25);
     rightList.add("food");
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -443,7 +442,7 @@ class DefaultDataStructureInterpreterTest {
     rightList.add(0);
     rightList.add(43.243);
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -458,7 +457,7 @@ class DefaultDataStructureInterpreterTest {
     var tuple: Tuple = {value: ["loves".atom(), 25, {value: foodList, type: Types.LIST}], type: Types.TUPLE};
     rightList.add(tuple);
     var right:LinkedList = {value: rightList, type: Types.LIST};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -474,7 +473,7 @@ class DefaultDataStructureInterpreterTest {
     var left: MatchValue = interp.decode("%{}", scope);
     var rightMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -498,7 +497,7 @@ class DefaultDataStructureInterpreterTest {
     var rightMap:Map<String, Dynamic> = new Map<String, Dynamic>();
     rightMap.set("anna", "food");
     var right:MatchStringMap = {value: rightMap, type: Types.MAP};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -515,7 +514,7 @@ class DefaultDataStructureInterpreterTest {
     var rightMap:ObjectMap<Dynamic, Dynamic> = new ObjectMap<Dynamic, Dynamic>();
     rightMap.set("anna".atom(), "food");
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -533,7 +532,7 @@ class DefaultDataStructureInterpreterTest {
     rightMap.set("anna".atom(), "food");
     rightMap.set("foo".atom(), "bar");
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 
@@ -561,7 +560,7 @@ class DefaultDataStructureInterpreterTest {
 
     var right:MatchObjectMap = {value: rightMap, type: Types.MAP};
 
-    var matchData:MatchData = matcher.match(left, right, new Map<String, Dynamic>());
+    var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
   }
 

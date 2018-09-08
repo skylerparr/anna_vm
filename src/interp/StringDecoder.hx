@@ -50,6 +50,7 @@ class StringDecoder implements DataStructureInterpreter {
   private static inline var HASH: String = "#";
   private static inline var CHEVRON_OPEN: String = "<";
   private static inline var CHEVRON_CLOSE: String = ">";
+  private static inline var DOT: String = ".";
 
   public function new() {
   }
@@ -93,13 +94,6 @@ class StringDecoder implements DataStructureInterpreter {
           break;
         }
       }
-      if(string.match(char)) {
-        if(parse.state == ParsingState.NONE) {
-          parse.state = ParsingState.VARIABLE;
-          currentVal = currentVal + char;
-          continue;
-        }
-      }
       if(number.match(char)) {
         if(parse.state == ParsingState.NONE) {
           parse.state = ParsingState.NUMBER;
@@ -109,7 +103,8 @@ class StringDecoder implements DataStructureInterpreter {
           currentVal = currentVal + char;
           continue;
         } else if(parse.state == ParsingState.VARIABLE) {
-          throw new UnableToInterpretStringError('Unexpected character');
+          currentVal = currentVal + char;
+          continue;
         }
       }
       if(char == QUOTE) {
@@ -133,7 +128,9 @@ class StringDecoder implements DataStructureInterpreter {
       }
       if(string.match(char)) {
         if(parse.state == ParsingState.NONE) {
-          throw new UnableToInterpretStringError('Unable to parse ${currentVal} in context.');
+          parse.state = ParsingState.VARIABLE;
+          currentVal = currentVal + char;
+          continue;
         } else if(parse.state == ParsingState.STRING) {
           currentVal = currentVal + char;
           continue;
@@ -272,6 +269,9 @@ class StringDecoder implements DataStructureInterpreter {
         parse.matchValue.varName = currentVal;
         parse.matchValue.value = scope.get(currentVal);
         break;
+      }
+      if(char == DOT && parse.state == ParsingState.VARIABLE) {
+        throw new UnableToInterpretStringError('Unable to interpret string');
       }
       currentVal = currentVal + char;
     }

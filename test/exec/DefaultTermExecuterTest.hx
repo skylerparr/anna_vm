@@ -78,6 +78,23 @@ class DefaultTermExecuterTest {
   }
 
   @Test
+  public function shouldInvokeNativeFunctionWithVariables(): Void {
+    var mailbox: List<MatchValue> = new List<MatchValue>();
+
+    var scope: ExecutionScope = mock(ExecutionScope);
+    scope.get("foo").returns(5);
+    scope.get("bar").returns(7);
+    var left: MatchValue = interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {foo, bar}}", scope);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    Assert.areEqual(value.value.value, 12);
+
+    scope.get("anna").returns(8);
+    var left: MatchValue = interp.decode("{:subtract, {:native, :\"lib.BasicMath\"}, {20, anna}}", scope);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    Assert.areEqual(value.value.value, 12);
+  }
+
+  @Test
   public function shouldInvokeANonNativeFunction(): Void {
     var mailbox: List<MatchValue> = new List<MatchValue>();
     var scope: ExecutionScope = mock(ExecutionScope);
@@ -85,8 +102,7 @@ class DefaultTermExecuterTest {
     var kernelResult: MatchValue = interp.decode("{:__block, {}}", scope);
     kernel.apply(process, "Foo".atom(), "bar".atom(), cast any).returns(kernelResult);
 
-    var scope: ExecutionScope = mock(ExecutionScope);
-    var left: MatchValue = interp.decode("{:Foo, {:anna, :bar, {}}", scope);
+    var left: MatchValue = interp.decode("{:Foo, {:anna, :bar}, {}}", scope);
     var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
     Assert.areEqual(value.type, ResultType.PUSH_STACK);
     Assert.areEqual(value.value, kernelResult);

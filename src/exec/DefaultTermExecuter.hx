@@ -40,7 +40,11 @@ class DefaultTermExecuter implements TermExecuter {
       var params: Array<Dynamic> = [];
       var argParams: Array<Dynamic> = cast args.value.value;
       for(arg in argParams) {
-        params.push(arg.value);
+        if(arg.type == MatchType.VARIABLE) {
+          params.push(scope.get(arg.varName));
+        } else {
+          params.push(arg.value);
+        }
       }
       if(clazz != null && fun != null && params != null) {
         try {

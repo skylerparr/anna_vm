@@ -15,6 +15,7 @@ import vm.DefaultSystemTest;
 import vm.DefaultKernelTest;
 import exec.DefaultTermExecuterTest;
 import lang.HashTableAtomsTest;
+import code.DefaultApplicationCodeTest;
 import util.StackUtilTest;
 
 /**
@@ -44,6 +45,7 @@ class TestSuite extends massive.munit.TestSuite
 		add(vm.DefaultKernelTest);
 		add(exec.DefaultTermExecuterTest);
 		add(lang.HashTableAtomsTest);
+		add(code.DefaultApplicationCodeTest);
 		add(util.StackUtilTest);
 	}
 }
