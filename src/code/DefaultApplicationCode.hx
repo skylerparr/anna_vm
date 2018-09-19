@@ -11,7 +11,7 @@ class DefaultApplicationCode implements ApplicationCode {
   @inject
   public var matcher: Matcher;
 
-  private var moduleMap: Map<Atom, Map<Atom, Array<Tuple>>>;
+  public var moduleMap: Map<Atom, Map<Atom, Array<Tuple>>>;
 
   public function new() {
   }
@@ -21,6 +21,8 @@ class DefaultApplicationCode implements ApplicationCode {
   }
 
   public function dispose():Void {
+    matcher = null;
+    moduleMap = null;
   }
 
   public function define(module:Atom, func:Atom, accessModifier:AccessModifier, args: MatchValue, block: MatchValue):Tuple {

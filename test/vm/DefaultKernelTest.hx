@@ -1,5 +1,6 @@
 package vm;
 
+import lang.MatchValue;
 import support.InterpSupport;
 import interp.DataStructureInterpreter;
 import interp.ExecutionScope;
@@ -16,7 +17,7 @@ class DefaultKernelTest {
 
   private var kernel: DefaultKernel;
   private var objectCreator: ObjectCreator;
-  private var process: Process;
+  private var parentProcess: Process;
   private var scope: ExecutionScope;
   private var interp: DataStructureInterpreter;
 
@@ -36,7 +37,7 @@ class DefaultKernelTest {
     objectCreator = mock(ObjectCreator);
     interp = InterpSupport.getInterpreter();
 
-    process = mock(Process);
+    parentProcess = mock(Process);
     scope = mock(ExecutionScope);
 
     kernel = new DefaultKernel();
@@ -53,8 +54,10 @@ class DefaultKernelTest {
   @Test
   public function shouldSpawnNewProcess(): Void {
     var newProcess: Process = mock(Process);
-    objectCreator.createInstance(cast any).returns(newProcess);
-    kernel.spawnProcess(process, null, scope);
+    objectCreator.createInstance(cast any, cast any, cast any).returns(newProcess);
+    var fun: MatchValue = interp.decode('{:Foo, {:anna, :bar}, {1, 2}}', scope);
+    var p = kernel.spawnProcess(parentProcess, fun, scope);
+    Assert.isNotNull(p);
   }
 
 }

@@ -53,7 +53,6 @@ class Main implements BaseObject {
     var process: Process = objectCreator.createInstance(Process, [], [fun, scope]);
     while(true) {
       process.execute();
-      Sys.sleep(1);
     }
     mainThread.sendMessage(false);
   }

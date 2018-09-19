@@ -26,8 +26,8 @@ class DefaultKernel implements Kernel {
   public function dispose():Void {
   }
 
-  public function spawnProcess(process: Process, matchValue:MatchValue, scope: ExecutionScope):Process {
-    return null;
+  public function spawnProcess(parentProcess: Process, fun:MatchValue, scope: ExecutionScope):Process {
+    return objectCreator.createInstance(Process, [], [fun, scope]);
   }
 
   public function endProcess(process:Process):Void {

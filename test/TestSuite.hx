@@ -2,6 +2,7 @@ import massive.munit.TestSuite;
 
 import code.DefaultApplicationCodeTest;
 import core.ObjectFactoryTest;
+import core.ThreadSafeProcessManagerTest;
 import exec.DefaultTermExecuterTest;
 import interp.DefaultDataStructureInterpreterTest;
 import interp.StringMapExecutionScopeTest;
@@ -32,6 +33,7 @@ class TestSuite extends massive.munit.TestSuite
 
 		add(code.DefaultApplicationCodeTest);
 		add(core.ObjectFactoryTest);
+		add(core.ThreadSafeProcessManagerTest);
 		add(exec.DefaultTermExecuterTest);
 		add(interp.DefaultDataStructureInterpreterTest);
 		add(interp.StringMapExecutionScopeTest);

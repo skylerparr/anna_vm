@@ -25,6 +25,17 @@ class SimpleProcess implements Process {
   public var stack: GenericStack<FunctionStack>;
   public var mailbox: List<MatchValue>;
 
+  @:isVar
+  public var parentProcess(get, set): Process;
+
+  private function get_parentProcess():Process {
+    return parentProcess;
+  }
+
+  private function set_parentProcess(value:Process):Process {
+    return this.parentProcess = value;
+  }
+
   public function new() {
   }
 

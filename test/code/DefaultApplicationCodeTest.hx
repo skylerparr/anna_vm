@@ -78,4 +78,11 @@ class DefaultApplicationCodeTest {
     Assert.isNotNull(matchValue);
     Assert.areEqual(interp.toString(block), interp.toString(matchValue));
   }
+
+  @Test
+  public function shouldDispose(): Void {
+    applicationCode.dispose();
+    Assert.isNull(applicationCode.matcher);
+    Assert.isNull(applicationCode.moduleMap);
+  }
 }
