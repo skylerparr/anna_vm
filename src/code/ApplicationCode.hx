@@ -12,6 +12,6 @@ enum AccessModifier {
 
 interface ApplicationCode extends BaseObject {
   function define(module: Atom, func: Atom, accessModifier: AccessModifier, args: MatchValue, block: MatchValue): Tuple;
-  function getCode(module: Atom, func: Atom, args: Tuple): MatchValue;
+  function getCode(module: Atom, func: Atom, args: MatchValue): MatchValue;
   function publicFunctions(module: Atom): Array<Atom>;
 }

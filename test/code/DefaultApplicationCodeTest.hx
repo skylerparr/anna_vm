@@ -72,9 +72,9 @@ class DefaultApplicationCodeTest {
     Assert.areSame(result.value[3], args);
     Assert.areSame(result.value[4], block);
 
-    var paramArms: MatchValue
+    var passingArgs: MatchValue = interp.decode('{1, "foo"}', scope);
 
-    var matchValue: MatchValue = applicationCode.getCode("Foo".atom(), "dance".atom(), {value: [1, "foo"], type: Types.TUPLE});
+    var matchValue: MatchValue = applicationCode.getCode("Foo".atom(), "dance".atom(), passingArgs);
     Assert.isNotNull(matchValue);
     Assert.areEqual(interp.toString(block), interp.toString(matchValue));
   }

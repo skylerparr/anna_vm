@@ -102,6 +102,12 @@ class DefaultMatcherTest {
 
     var matchData:MatchData = matcher.match(left, right);
     Assert.isTrue(matchData.matched);
+    
+    left = { varName: null, value: { value: [{ varName: "arg1", value: null, type: VARIABLE },{ varName: "arg2", value: null, type: VARIABLE }], type: TUPLE }, type: COMPLEX }
+    right = { value: [1, "foo"], type: TUPLE };
+
+    matchData = matcher.match(left, right);
+    Assert.isTrue(matchData.matched);
   }
 
   @Test

@@ -59,7 +59,7 @@ class DefaultTermExecuter implements TermExecuter {
     } else if(realm == ("anna".atom())) {
       var mod: Atom = term.value[0].value;
       var fun: Atom = context.value.value[1].value;
-      var args: Tuple = term.value[2];
+      var args: MatchValue = term.value[2];
 
       try {
         var funResult: MatchValue = kernel.apply(process, mod, fun, args);

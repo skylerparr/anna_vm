@@ -37,7 +37,7 @@ class DefaultApplicationCode implements ApplicationCode {
     return functionDef;
   }
 
-  public function getCode(module:Atom, func:Atom, right:Tuple):MatchValue {
+  public function getCode(module:Atom, func:Atom, right: MatchValue):MatchValue {
     var context: Array<Dynamic> = getContext(module, func);
     var functionMap: Map<Atom, Array<Tuple>> = context[0];
     var functions: Array<Tuple> = context[1];

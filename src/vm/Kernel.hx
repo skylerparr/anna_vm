@@ -13,6 +13,6 @@ interface Kernel extends BaseObject {
   function endProcess(process: Process): Void;
   function processError(process: Process): Void;
 
-  function apply(process: Process, module: Atom, fun: Atom, args: Tuple): MatchValue;
+  function apply(process: Process, module: Atom, fun: Atom, args: MatchValue): MatchValue;
   function receive(process: Process): MatchValue;
 }

@@ -1,22 +1,22 @@
 import massive.munit.TestSuite;
 
+import code.DefaultApplicationCodeTest;
 import core.ObjectFactoryTest;
-import matcher.DefaultMatcherTest;
-import interp.StringMapExecutionScopeTest;
+import exec.DefaultTermExecuterTest;
 import interp.DefaultDataStructureInterpreterTest;
+import interp.StringMapExecutionScopeTest;
+import lang.HashTableAtomsTest;
+import matcher.DefaultMatcherTest;
+import util.StackUtilTest;
+import vm.DefaultKernelTest;
+import vm.DefaultSystemTest;
+import vm.SimpleProcessTest;
+import vm.terms.VMAtomTest;
 import vm.terms.VMFloatTest;
 import vm.terms.VMIntegerTest;
 import vm.terms.VMSmallUTF8AtomTest;
 import vm.terms.VMStringTest;
-import vm.terms.VMAtomTest;
 import vm.terms.VMUTF8AtomTest;
-import vm.SimpleProcessTest;
-import vm.DefaultSystemTest;
-import vm.DefaultKernelTest;
-import exec.DefaultTermExecuterTest;
-import lang.HashTableAtomsTest;
-import code.DefaultApplicationCodeTest;
-import util.StackUtilTest;
 
 /**
  * Auto generated Test Suite for MassiveUnit.
@@ -30,22 +30,22 @@ class TestSuite extends massive.munit.TestSuite
 	{
 		super();
 
+		add(code.DefaultApplicationCodeTest);
 		add(core.ObjectFactoryTest);
-		add(matcher.DefaultMatcherTest);
-		add(interp.StringMapExecutionScopeTest);
+		add(exec.DefaultTermExecuterTest);
 		add(interp.DefaultDataStructureInterpreterTest);
+		add(interp.StringMapExecutionScopeTest);
+		add(lang.HashTableAtomsTest);
+		add(matcher.DefaultMatcherTest);
+		add(util.StackUtilTest);
+		add(vm.DefaultKernelTest);
+		add(vm.DefaultSystemTest);
+		add(vm.SimpleProcessTest);
+		add(vm.terms.VMAtomTest);
 		add(vm.terms.VMFloatTest);
 		add(vm.terms.VMIntegerTest);
 		add(vm.terms.VMSmallUTF8AtomTest);
 		add(vm.terms.VMStringTest);
-		add(vm.terms.VMAtomTest);
 		add(vm.terms.VMUTF8AtomTest);
-		add(vm.SimpleProcessTest);
-		add(vm.DefaultSystemTest);
-		add(vm.DefaultKernelTest);
-		add(exec.DefaultTermExecuterTest);
-		add(lang.HashTableAtomsTest);
-		add(code.DefaultApplicationCodeTest);
-		add(util.StackUtilTest);
 	}
 }

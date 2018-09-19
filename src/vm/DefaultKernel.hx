@@ -1,5 +1,6 @@
 package vm;
 
+import lang.MatchData;
 import code.ApplicationCode;
 import vm.Process;
 import interp.ExecutionScope;
@@ -36,7 +37,7 @@ class DefaultKernel implements Kernel {
   public function processError(process:Process):Void {
   }
 
-  public function apply(process: Process, module:Atom, fun:Atom, args:Tuple):MatchValue {
+  public function apply(process: Process, module:Atom, fun:Atom, args:MatchValue):MatchValue {
     return applicationCode.getCode(module, fun, args);
   }
 
