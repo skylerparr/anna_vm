@@ -1,5 +1,6 @@
 package vm;
 
+import code.ApplicationCode;
 import vm.Process;
 import interp.ExecutionScope;
 import core.ObjectCreator;
@@ -11,6 +12,9 @@ class DefaultKernel implements Kernel {
 
   @inject
   public var objectCreator: ObjectCreator;
+
+  @inject
+  public var applicationCode: ApplicationCode;
 
   public function new() {
   }
@@ -33,7 +37,7 @@ class DefaultKernel implements Kernel {
   }
 
   public function apply(process: Process, module:Atom, fun:Atom, args:Tuple):MatchValue {
-    return null;
+    return applicationCode.getCode(module, fun, args);
   }
 
   public function receive(process:Process):MatchValue {

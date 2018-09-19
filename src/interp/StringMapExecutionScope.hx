@@ -28,4 +28,13 @@ class StringMapExecutionScope implements ExecutionScope {
       return "nil".atom();
     }
   }
+
+  public function print():Void {
+    var items: Array<String> = [];
+    for(key in varMap.keys()) {
+      items.push('"${key} => ${varMap.get(key)}"');
+    }
+    trace('%{${items.join(", ")}}');
+  }
+
 }

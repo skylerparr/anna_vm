@@ -1,4 +1,6 @@
 package core;
+import code.DefaultApplicationCode;
+import code.ApplicationCode;
 import lang.AtomSupport;
 import lang.HashTableAtoms;
 import lang.Atoms;
@@ -35,14 +37,15 @@ class InjectionSettings {
 
     injector.mapValue(Atoms, atoms);
     injector.mapSingletonOf(Logger, TraceLogger);
-    injector.mapClass(Process, SimpleProcess);
-    injector.mapSingletonOf(Kernel, DefaultKernel);
     injector.mapSingletonOf(Matcher, DefaultMatcher);
+    injector.mapValue(ApplicationCode, objectFactory.createInstance(DefaultApplicationCode));
     injector.mapSingletonOf(StringDecoder, StringDecoder);
     injector.mapSingletonOf(StringEncoder, StringEncoder);
     injector.mapSingletonOf(DataStructureInterpreter, DefaultDataStructureInterpreter);
     injector.mapClass(ExecutionScope, StringMapExecutionScope);
     injector.mapClass(TermExecuter, DefaultTermExecuter);
+    injector.mapClass(Process, SimpleProcess);
+    injector.mapSingletonOf(Kernel, DefaultKernel);
 
     complete(objectFactory);
   }

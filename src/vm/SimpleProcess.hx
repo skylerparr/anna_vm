@@ -60,7 +60,6 @@ class SimpleProcess implements Process {
       status = ProcessStatus.STOPPED;
     } else {
       var term: MatchValue = functionStack.terms[functionStack.index];
-
       if(term == null) {
         if(stack.first() != null) {
           stack.pop();

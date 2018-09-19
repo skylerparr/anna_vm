@@ -23,7 +23,7 @@ class DefaultApplicationCode implements ApplicationCode {
   public function dispose():Void {
   }
 
-  public function define(module:Atom, func:Atom, accessModifier:AccessModifier, args: MatchValue, block: Array<MatchValue>):Tuple {
+  public function define(module:Atom, func:Atom, accessModifier:AccessModifier, args: MatchValue, block: MatchValue):Tuple {
     var functionDef: Tuple = {type: Types.TUPLE, value: [module, func, accessModifier, args, block]};
 
     var context: Array<Dynamic> = getContext(module, func);
@@ -44,8 +44,8 @@ class DefaultApplicationCode implements ApplicationCode {
 
     for(fun in functions) {
       var left: MatchValue = fun.value[3];
-      if(matcher.match(left, right)) {
-        return null;
+      if(matcher.match(left, right.value).matched) {
+        return fun.value[4];
       }
     }
     return null;

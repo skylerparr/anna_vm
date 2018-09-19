@@ -57,10 +57,11 @@ class DefaultApplicationCodeTest {
 
   @Test
   public function shouldDefineAModuleAndFetchIt(): Void {
-    var block: Array<MatchValue> = [];
+    var block: MatchValue = interp.decode('{:__block__, {}}', scope);
+    var blockDetails: Array<MatchValue> = block.value.value[1].value.value;
     for(i in 0...5) {
       var c: MatchValue = interp.decode('{:add, {:native, :\"lib.BasicMath\"}, {${i}, ${i}}}', scope);
-      block.push(c);
+      blockDetails.push(c);
     }
     var args: MatchValue = interp.decode('{arg1, arg2}', scope);
 
@@ -71,8 +72,10 @@ class DefaultApplicationCodeTest {
     Assert.areSame(result.value[3], args);
     Assert.areSame(result.value[4], block);
 
+    var paramArms: MatchValue
+
     var matchValue: MatchValue = applicationCode.getCode("Foo".atom(), "dance".atom(), {value: [1, "foo"], type: Types.TUPLE});
     Assert.isNotNull(matchValue);
-    trace(matchValue);
+    Assert.areEqual(interp.toString(block), interp.toString(matchValue));
   }
 }
