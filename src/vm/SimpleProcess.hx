@@ -1,4 +1,5 @@
 package vm;
+import hx.concurrent.collection.SynchronizedLinkedList;
 import vm.FunctionStack;
 import core.ObjectCreator;
 import exec.TermExecuter;
@@ -23,7 +24,7 @@ class SimpleProcess implements Process {
   }
 
   public var stack: GenericStack<FunctionStack>;
-  public var mailbox: List<MatchValue>;
+  public var mailbox: SynchronizedLinkedList<MatchValue>;
 
   @:isVar
   public var parentProcess(get, set): Process;
@@ -45,7 +46,7 @@ class SimpleProcess implements Process {
     scope.put("$currentProcess$", this);
 
     stack = new GenericStack<FunctionStack>();
-    mailbox = new List<MatchValue>();
+    mailbox = new SynchronizedLinkedList<MatchValue>();
 
     var funStack: FunctionStack = new FunctionStack([term], scope);
     stack.add(funStack);
@@ -80,7 +81,7 @@ class SimpleProcess implements Process {
           }
         }
       } else {
-        var result: ExecutionResult = executer.execute(term.value, this, functionStack.scope, mailbox);
+        var result: ExecutionResult = executer.execute(term.value, this, functionStack.scope);
         switch result.type {
           case ResultType.PUSH_STACK:
             pushStack(functionStack, result);
@@ -117,6 +118,10 @@ class SimpleProcess implements Process {
 
   public function setWaiting():Void {
     status = ProcessStatus.WAITING;
+  }
+
+  public function send(matchValue:MatchValue):Void {
+    mailbox.add(matchValue);
   }
 
 }

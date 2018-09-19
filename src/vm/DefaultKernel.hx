@@ -41,6 +41,9 @@ class DefaultKernel implements Kernel {
     return applicationCode.getCode(module, fun, args);
   }
 
+  public function send(process:Process, data:MatchValue):Void {
+  }
+
   public function receive(process:Process):MatchValue {
     return null;
   }

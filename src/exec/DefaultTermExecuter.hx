@@ -26,7 +26,7 @@ class DefaultTermExecuter implements TermExecuter {
   public function dispose():Void {
   }
 
-  public function execute(term:Tuple, process: Process, scope: ExecutionScope, mailbox: List<MatchValue>):ExecutionResult {
+  public function execute(term:Tuple, process: Process, scope: ExecutionScope):ExecutionResult {
     var values: Array<Dynamic> = term.value;
     var operator: MatchValue = values[0];
     var context: MatchValue = values[1];

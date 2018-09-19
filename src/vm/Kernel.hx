@@ -15,4 +15,5 @@ interface Kernel extends BaseObject {
 
   function apply(process: Process, module: Atom, fun: Atom, args: MatchValue): MatchValue;
   function receive(process: Process): MatchValue;
+  function send(process: Process, data: MatchValue): Void;
 }

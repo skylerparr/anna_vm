@@ -61,19 +61,19 @@ class DefaultTermExecuterTest {
 
     var scope: ExecutionScope = mock(ExecutionScope);
     var left: MatchValue = interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.value.value, 2);
 
     var left: MatchValue = interp.decode("{:subtract, {:native, :\"lib.BasicMath\"}, {1, 1}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.value.value, 0);
 
     var left: MatchValue = interp.decode("{:multiply, {:native, :\"lib.BasicMath\"}, {9, 9}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.value.value, 81);
 
     var left: MatchValue = interp.decode("{:divide, {:native, :\"lib.BasicMath\"}, {81, 9}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.value.value, 9);
   }
 
@@ -85,12 +85,12 @@ class DefaultTermExecuterTest {
     scope.get("foo").returns(5);
     scope.get("bar").returns(7);
     var left: MatchValue = interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {foo, bar}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.value.value, 12);
 
     scope.get("anna").returns(8);
     var left: MatchValue = interp.decode("{:subtract, {:native, :\"lib.BasicMath\"}, {20, anna}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.value.value, 12);
   }
 
@@ -103,7 +103,7 @@ class DefaultTermExecuterTest {
     kernel.apply(process, "Foo".atom(), "bar".atom(), cast any).returns(kernelResult);
 
     var left: MatchValue = interp.decode("{:Foo, {:anna, :bar}, {}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.type, ResultType.PUSH_STACK);
     Assert.areEqual(value.value, kernelResult);
   }
@@ -118,7 +118,7 @@ class DefaultTermExecuterTest {
 
     var scope: ExecutionScope = mock(ExecutionScope);
     var left: MatchValue = interp.decode("{:Foo, {:anna, :bar}, {}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.type, ResultType.ERROR);
     Assert.areEqual(value.value.value, "Bad Match");
   }
@@ -129,12 +129,12 @@ class DefaultTermExecuterTest {
     var scope: ExecutionScope = mock(ExecutionScope);
 
     var left: MatchValue = interp.decode("{:error, {:native, :\"lib.BasicMath\"}, {81, 9}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.type, ResultType.ERROR);
     Assert.isNotNull(value.value);
 
     var left: MatchValue = interp.decode("{:kdasfjlsdf, {:native, :\"lib.BasicMath\"}, {81, 9}}", scope);
-    var value: ExecutionResult = termExecuter.execute(left.value, process, scope, mailbox);
+    var value: ExecutionResult = termExecuter.execute(left.value, process, scope);
     Assert.areEqual(value.type, ResultType.ERROR);
     Assert.isNotNull(value.value);
   }
