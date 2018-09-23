@@ -1,6 +1,5 @@
 package core;
 import hx.concurrent.collection.SynchronizedLinkedList;
-import cpp.vm.Deque;
 import vm.Process;
 class ThreadSafeProcessManager implements ProcessManager {
 

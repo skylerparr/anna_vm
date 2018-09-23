@@ -37,34 +37,35 @@ class Main implements BaseObject {
   private function onCreate():Void {
     mainThread = Thread.readMessage(true);
 
-    var scope: ExecutionScope = objectCreator.createInstance(ExecutionScope);
-    var block: MatchValue = interp.decode('{:__block__, {}}', scope);
-
-    var blockDetails: Array<MatchValue> = block.value.value[1].value.value;
-    for(i in 0...5) {
-      var c: MatchValue = interp.decode('{:add, {:native, :\"lib.BasicMath\"}, {${i}, ${i}}}', scope);
-      blockDetails.push(c);
-    }
-    var args: MatchValue = interp.decode('{arg1, arg2}', scope);
-    applicationCode.define("Foo".atom(), "bar".atom(), AccessModifier.PUBLIC, args, block);
-
-    var fun: MatchValue = interp.decode('{:Foo, {:anna, :bar}, {1, 2}}', scope);
-
-    var process: Process = objectCreator.createInstance(Process, [], [fun, scope]);
-    while(true) {
-      process.execute();
-    }
-    mainThread.sendMessage(false);
+//    var scope: ExecutionScope = objectCreator.createInstance(ExecutionScope);
+//    var block: MatchValue = interp.decode('{:__block__, {}}', scope);
+//
+//    var blockDetails: Array<MatchValue> = block.value.value[1].value.value;
+//    for(i in 0...5) {
+//      var c: MatchValue = interp.decode('{:add, {:native, :\"lib.BasicMath\"}, {${i}, ${i}}}', scope);
+//      blockDetails.push(c);
+//    }
+//    var args: MatchValue = interp.decode('{arg1, arg2}', scope);
+//    applicationCode.define("Foo".atom(), "bar".atom(), AccessModifier.PUBLIC, args, block);
+//
+//    var fun: MatchValue = interp.decode('{:Foo, {:anna, :bar}, {1, 2}}', scope);
+//
+//    var process: Process = objectCreator.createInstance(Process, [], [fun, scope]);
+//    while(true) {
+//      Sys.sleep(1000);
+//      process.execute();
+//    }
+//    mainThread.sendMessage(false);
   }
 
   public function init(args:Array<Dynamic> = null):Void {
     trace("VM started");
-    var thread: Thread = Thread.create(onCreate);
-    thread.sendMessage(Thread.current());
-    var running: Bool = true;
-    while(running) {
-      running = Thread.readMessage(true);
-    }
+//    var thread: Thread = Thread.create(onCreate);
+//    thread.sendMessage(Thread.current());
+//    var running: Bool = true;
+//    while(running) {
+//      running = Thread.readMessage(true);
+//    }
   }
 
   public function dispose():Void {

@@ -39,6 +39,8 @@ class InjectionSettings {
     injector.mapSingletonOf(Logger, TraceLogger);
     injector.mapSingletonOf(Matcher, DefaultMatcher);
     injector.mapValue(ApplicationCode, objectFactory.createInstance(DefaultApplicationCode));
+    injector.mapClass(Scheduler, CPPScheduler);
+    injector.mapValue(SchedulerManager, objectFactory.createInstance(CPPSchedulerManager));
     injector.mapSingletonOf(StringDecoder, StringDecoder);
     injector.mapSingletonOf(StringEncoder, StringEncoder);
     injector.mapSingletonOf(DataStructureInterpreter, DefaultDataStructureInterpreter);
