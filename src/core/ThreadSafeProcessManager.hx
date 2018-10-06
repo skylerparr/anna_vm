@@ -1,8 +1,13 @@
 package core;
+import lang.MatchValue;
+import interp.ExecutionScope;
 import hx.concurrent.collection.SynchronizedLinkedList;
 import vm.Process;
 class ThreadSafeProcessManager implements ProcessManager {
 
+  @inject
+  public var objectCreator: ObjectCreator;
+  
   public var processess: SynchronizedLinkedList<Process>;
 
   public function new() {
@@ -13,11 +18,16 @@ class ThreadSafeProcessManager implements ProcessManager {
   }
 
   public function dispose():Void {
+    objectCreator = null;
     processess = null;
   }
 
-  public function storeProcess(process:Process):Void {
+  public function startProcess(parentProcess:Process, fun:MatchValue, scope:ExecutionScope):Process {
+    var process: Process = objectCreator.createInstance(Process, [], [fun, scope]);
+    process.parentProcess = parentProcess;
+    parentProcess.addChildProcess(process);
     processess.add(process);
+    return process;
   }
 
   public function getNext():Process {
@@ -27,6 +37,14 @@ class ThreadSafeProcessManager implements ProcessManager {
   }
 
   public function killProcess(process:Process):Void {
+    for(child in process.childProcesses) {
+      termProcess(child);
+    }
+    termProcess(process);
+  }
+
+  public function termProcess(process:Process):Void {
+    process.setStopped();
     processess.remove(process);
   }
 

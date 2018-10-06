@@ -1,5 +1,6 @@
 package vm;
 
+import vm.Process;
 import interp.DataStructureInterpreter;
 import support.InterpSupport;
 import core.ObjectCreator;
@@ -166,12 +167,54 @@ class SimpleProcessTest {
   }
 
   @Test
+  public function shouldSetProcessAsStopped(): Void {
+    var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
+    var execResult: ExecutionResult = {type: ResultType.CONSTANT, value: {type: MatchType.CONSTANT, varName: null, value: 2}};
+    termExecuter.execute(cast any, process, cast any).returns(execResult);
+    process.execute();
+    process.setStopped();
+    Assert.areEqual(ProcessStatus.STOPPED, process.status);
+  }
+
+  @Test
   public function shouldAddMatchValueToProcessMailbox() {
     var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
     var data: MatchValue = interp.decode('{:foo, "bar"}', emptyScope);
     Assert.areEqual(process.mailbox.length, 0);
     process.send(data);
     Assert.areEqual(process.mailbox.length, 1);
+  }
+
+  @Test
+  public function shouldAddChildProcess(): Void {
+    var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
+    var child1: Process = mock(Process);
+    var child2: Process = mock(Process);
+    var child3: Process = mock(Process);
+
+    process.addChildProcess(child1);
+    process.addChildProcess(child2);
+    process.addChildProcess(child3);
+
+    Assert.areEqual(process.childProcesses.length, 3);
+  }
+
+  @Test
+  public function shouldRemoveChildProcess(): Void {
+    var process: SimpleProcess = createProcess(interp.decode("{:add, {:native, :\"lib.BasicMath\"}, {1, 1}}", emptyScope));
+    var child1: Process = mock(Process);
+    var child2: Process = mock(Process);
+    var child3: Process = mock(Process);
+
+    process.addChildProcess(child1);
+    process.addChildProcess(child2);
+    process.addChildProcess(child3);
+
+    process.removeChildProcess(child1);
+    process.removeChildProcess(child2);
+    process.removeChildProcess(child3);
+
+    Assert.areEqual(process.childProcesses.length, 0);
   }
 
   private inline function createProcess(matchValue: MatchValue): SimpleProcess {

@@ -37,6 +37,14 @@ class SimpleProcess implements Process {
     return this.parentProcess = value;
   }
 
+  private var childrenProcesses: SynchronizedLinkedList<Process>;
+
+  public var childProcesses(get, null):Array<Process>;
+
+  function get_childProcesses():Array<Process> {
+    return childrenProcesses.toArray();
+  }
+
   public function new() {
   }
 
@@ -47,11 +55,12 @@ class SimpleProcess implements Process {
 
     stack = new GenericStack<FunctionStack>();
     mailbox = new SynchronizedLinkedList<MatchValue>();
+    childrenProcesses = new SynchronizedLinkedList<Process>();
 
     var funStack: FunctionStack = new FunctionStack([term], scope);
     stack.add(funStack);
 
-    status = ProcessStatus.WAITING;
+    status = ProcessStatus.RUNNING;
   }
 
   public function dispose():Void {
@@ -69,7 +78,7 @@ class SimpleProcess implements Process {
     var functionStack: FunctionStack = stack.first();
     if(functionStack == null) {
       kernel.endProcess(this);
-      status = ProcessStatus.STOPPED;
+      setStopped();
     } else {
       var term: MatchValue = functionStack.terms[functionStack.index];
       if(term == null) {
@@ -77,7 +86,7 @@ class SimpleProcess implements Process {
           stack.pop();
           if(stack.isEmpty()) {
             kernel.endProcess(this);
-            status = ProcessStatus.STOPPED;
+            setStopped();
           }
         }
       } else {
@@ -88,7 +97,7 @@ class SimpleProcess implements Process {
           case ResultType.CONSTANT:
             functionStack.scope.put("$result$", result.value);
           case ResultType.ERROR:
-            status = ProcessStatus.STOPPED;
+            setStopped();
             kernel.processError(this);
         }
         functionStack.index++;
@@ -112,12 +121,24 @@ class SimpleProcess implements Process {
     stack.add(funStack);
   }
 
+  public function addChildProcess(process:Process):Void {
+    childrenProcesses.add(process);
+  }
+
+  public function removeChildProcess(process:Process):Void {
+    childrenProcesses.remove(process);
+  }
+
   public function receiveMessage(matchValue:MatchValue):Void {
     mailbox.add(matchValue);
   }
 
   public function setWaiting():Void {
     status = ProcessStatus.WAITING;
+  }
+
+  public function setStopped():Void {
+    status = ProcessStatus.STOPPED;
   }
 
   public function send(matchValue:MatchValue):Void {

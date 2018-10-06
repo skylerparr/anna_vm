@@ -10,4 +10,7 @@ class CPPScheduler implements Scheduler {
 
   public function dispose():Void {
   }
+
+  public function start(onFinished: Scheduler->Void):Void {
+  }
 }

@@ -1,5 +1,6 @@
 package vm;
 
+import core.ProcessManager;
 import lang.MatchData;
 import code.ApplicationCode;
 import vm.Process;
@@ -17,6 +18,9 @@ class DefaultKernel implements Kernel {
   @inject
   public var applicationCode: ApplicationCode;
 
+  @inject
+  public var processManager: ProcessManager;
+
   public function new() {
   }
 
@@ -26,12 +30,12 @@ class DefaultKernel implements Kernel {
   public function dispose():Void {
   }
 
-  public function spawnProcess(parentProcess: Process, fun:MatchValue, scope: ExecutionScope):Process {
-    return objectCreator.createInstance(Process, [], [fun, scope]);
+  public function spawnProcess(parentProcess: Process, fun: MatchValue, scope: ExecutionScope):Process {
+    return processManager.startProcess(parentProcess, fun, scope);
   }
 
   public function endProcess(process:Process):Void {
-    trace("end process");
+    processManager.termProcess(process);
   }
 
   public function processError(process:Process):Void {

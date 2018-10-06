@@ -7,6 +7,9 @@ class CPPSchedulerManager implements SchedulerManager {
   @inject
   public var objectCreator: ObjectCreator;
 
+  @inject
+  public var processManager: ProcessManager;
+
   public var mainThread: Thread;
 
   public var schedulers: Array<Scheduler>;
@@ -16,22 +19,13 @@ class CPPSchedulerManager implements SchedulerManager {
 
   public function init(args:Array<Dynamic> = null):Void {
     schedulers = [];
-
-    var thread: Thread = Thread.create(onSchedulerCreated);
-
-    thread.sendMessage(Thread.current());
-    var running: Bool = true;
-    while(running) {
-      running = Thread.readMessage(true);
-    }
+    createSchedulers();
   }
 
   public function dispose():Void {
   }
 
-  public function onSchedulerCreated() {
-    mainThread = Thread.readMessage(true);
-
+  public function createSchedulers() {
     for(i in 0...8) {
       var scheduler: Scheduler = objectCreator.createInstance(Scheduler);
       schedulers.push(scheduler);
