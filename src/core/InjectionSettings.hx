@@ -36,6 +36,9 @@ class InjectionSettings {
     AtomSupport.atoms = atoms;
 
     injector.mapValue(Atoms, atoms);
+    injector.mapValue(ProcessManager, objectFactory.createInstance(ThreadSafeProcessManager))
+    injector.mapClass(Scheduler, ExperimentalScheduler)
+    injector.mapValue(SchedulerManager, objectFactory.createInstance(ExperimentalSchedulerManager));
     injector.mapSingletonOf(Logger, TraceLogger);
     injector.mapSingletonOf(Matcher, DefaultMatcher);
     injector.mapValue(ApplicationCode, objectFactory.createInstance(DefaultApplicationCode));

@@ -46,6 +46,7 @@ class DefaultKernel implements Kernel {
   }
 
   public function send(process:Process, data:MatchValue):Void {
+    process.send(data);
   }
 
   public function receive(process:Process):MatchValue {
